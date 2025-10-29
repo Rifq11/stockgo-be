@@ -1,4 +1,4 @@
-# kurir-barang-be
+# StockGo-Be
 
 Backend API for Warehouse and Delivery Management System built with Express, TypeScript, and Drizzle ORM (MySQL) for SMKN 24 Jakarta - Kelompok 09.
 
@@ -20,8 +20,7 @@ Backend API for Warehouse and Delivery Management System built with Express, Typ
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd kurir-barang/be
+git clone https://github.com/Rifq11/stockgo-be.git
 ```
 
 ### 2. Install dependencies
@@ -35,23 +34,8 @@ npm install
 Buat file `.env` di root project dan tambahkan:
 
 ```env
-# Server Configuration
+DATABASE_URL="mysql://USER:PASSWORD1@HOST:PORT/DATABASE"
 PORT=3000
-NODE_ENV=development
-
-# Database Configuration
-DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
-
-# JWT Configuration
-JWT_SECRET="your-super-secret-jwt-key-here"
-JWT_EXPIRES_IN="7d"
-
-# File Upload Configuration
-UPLOAD_DIR=uploads
-MAX_FILE_SIZE=10485760
-
-# CORS Configuration
-CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 ```
 
 Ganti `USER`, `PASSWORD`, `HOST`, `PORT`, dan `DATABASE` sesuai konfigurasi MySQL Anda.
