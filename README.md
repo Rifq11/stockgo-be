@@ -48,7 +48,28 @@ Ganti `USER`, `PASSWORD`, `HOST`, `PORT`, dan `DATABASE` sesuai konfigurasi MySQ
   npm run drizzle:push
   ```
 
-### 5. Jalankan aplikasi
+### 5. Seed Database (Optional)
+
+Untuk isi data dummy:
+```bash
+npm run seed
+```
+
+Ini akan membuat:
+- 5 user (admin, dispatcher, 2 kurir, petugas gudang)
+- 2 warehouse
+- 4 categories
+- 4 products
+- 3 customers
+
+**Login credentials:**
+- Admin: `admin@kurirbarang.com` / `password`
+- Dispatcher: `dispatcher@kurirbarang.com` / `password`
+- Kurir 1: `kurir1@kurirbarang.com` / `password`
+- Kurir 2: `kurir2@kurirbarang.com` / `password`
+- Petugas Gudang: `gudang@kurirbarang.com` / `password`
+
+### 6. Jalankan aplikasi
 
 #### Development (dengan hot reload):
 
@@ -253,6 +274,7 @@ Sistem ini dirancang khusus untuk **distributor** yang membutuhkan:
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
+- `npm run seed` - Seed database with dummy data
 - `npm run drizzle:gen` - Generate migrations
 - `npm run drizzle:push` - Push schema to database
 - `npm run drizzle:studio` - Open Drizzle Studio
