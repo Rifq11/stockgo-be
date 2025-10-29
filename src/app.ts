@@ -22,8 +22,18 @@ import authRoutes from './modules/auth/auth.routes';
 import warehouseRoutes from './modules/warehouse/warehouse.routes';
 import kurirRoutes from './modules/kurir/kurir.routes';
 import expeditionRoutes from './modules/expedition/expedition.routes';
+import customerRoutes from './modules/customer/customer.routes';
+import deliveryRoutes from './modules/delivery/delivery.routes';
+import dashboardRoutes from './modules/dashboard/dashboard.routes';
+import mediaRoutes from './modules/media/media.routes';
+import productRoutes from './modules/product/product.routes';
 
 app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/kurir', kurirRoutes);
 app.use('/api/expeditions', expeditionRoutes);

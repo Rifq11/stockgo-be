@@ -86,6 +86,7 @@ export const productImage = mysqlTable('product_image', {
     id: int('id').primaryKey().autoincrement(),
     product_id: int('product_id').notNull().references(() => product.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     image_url: varchar('image_url', { length: 500 }).notNull(),
+    api_url: varchar('api_url', { length: 500 }),
     is_primary: boolean('is_primary').notNull().default(false),
     ...timestamps
 });

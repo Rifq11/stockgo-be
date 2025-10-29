@@ -34,11 +34,24 @@ npm install
 
 Buat file `.env` di root project dan tambahkan:
 
-```
-DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
+```env
+# Server Configuration
 PORT=3000
+NODE_ENV=development
+
+# Database Configuration
+DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
+
+# JWT Configuration
 JWT_SECRET="your-super-secret-jwt-key-here"
 JWT_EXPIRES_IN="7d"
+
+# File Upload Configuration
+UPLOAD_DIR=uploads
+MAX_FILE_SIZE=10485760
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 ```
 
 Ganti `USER`, `PASSWORD`, `HOST`, `PORT`, dan `DATABASE` sesuai konfigurasi MySQL Anda.
@@ -72,13 +85,34 @@ Aplikasi akan berjalan di `http://localhost:3000` (atau port sesuai `.env`).
 
 ## API Endpoint
 
-### Auth
+### 🔐 Authentication
 
-- `POST /api/auth/login` — Login user
-- `POST /api/auth/register` — Register user
-- `POST /api/auth/logout` — Logout
+- `POST /api/auth/login` — Login user (Mobile & Admin)
+- `POST /api/auth/register` — Register user (Admin only)
+- `POST /api/auth/logout` — Logout (Authenticated)
+- `GET /api/auth/profile` — Get user profile (Authenticated)
 
-### Warehouses (Data Gudang)
+### 👥 Customer Management (Admin)
+
+- `POST /api/customers` — Create customer
+- `GET /api/customers` — List customers
+- `GET /api/customers/:id` — Get customer by ID
+- `PUT /api/customers/:id` — Update customer
+- `DELETE /api/customers/:id` — Delete customer
+
+### 📦 Delivery Management
+
+**Mobile App Endpoints:**
+- `GET /api/deliveries/track/:tracking_number` — Track delivery (Public)
+- `GET /api/deliveries` — Get deliveries
+- `GET /api/deliveries/:id` — Get delivery details
+
+**Admin Endpoints:**
+- `POST /api/deliveries` — Create delivery
+- `PUT /api/deliveries/:id/status` — Update delivery status
+- `PUT /api/deliveries/:id/assign` — Assign kurir
+
+### 🏢 Warehouse Management
 
 - `GET /api/warehouses` — List warehouses
 - `GET /api/warehouses/:id` — Get warehouse by ID
@@ -86,14 +120,14 @@ Aplikasi akan berjalan di `http://localhost:3000` (atau port sesuai `.env`).
 - `PUT /api/warehouses/:id` — Update warehouse
 - `DELETE /api/warehouses/:id` — Delete warehouse
 
-### Kurir Management
+### 🚚 Kurir Management
 
 - `GET /api/kurir` — List kurir
 - `GET /api/kurir/:id` — Get kurir by ID
 - `PUT /api/kurir/:id/status` — Update kurir status
 - `GET /api/kurir/:id/performance` — Get kurir performance
 
-### Expeditions (Laporan Ekspedisi)
+### 🚛 Expeditions Management
 
 - `GET /api/expeditions` — List expeditions
 - `GET /api/expeditions/:id` — Get expedition by ID
@@ -101,17 +135,19 @@ Aplikasi akan berjalan di `http://localhost:3000` (atau port sesuai `.env`).
 - `PUT /api/expeditions/:id/status` — Update expedition status
 - `GET /api/expeditions/reports/summary` — Get expedition reports
 
-### Products (Coming Soon)
+### 📊 Dashboard & Analytics (Admin)
 
-- `GET /api/products` — List products
-- `POST /api/products` — Create product
-- `PUT /api/products/:id` — Update product
+- `GET /api/dashboard/stats` — Get dashboard statistics
+- `GET /api/dashboard/analytics` — Get delivery analytics
+- `GET /api/dashboard/kurir-performance` — Get kurir performance
+- `GET /api/dashboard/warehouse-stats` — Get warehouse statistics
 
-### Deliveries (Coming Soon)
+### 📁 Media Management
 
-- `GET /api/deliveries` — List deliveries
-- `POST /api/deliveries` — Create delivery
-- `PUT /api/deliveries/:id` — Update delivery status
+- `POST /api/media/upload` — Upload delivery media files
+- `GET /api/media/delivery/:delivery_id` — Get delivery media
+- `DELETE /api/media/:id` — Delete media file
+- `GET /api/media/serve/:type/:filename` — Serve media file
 
 ---
 
