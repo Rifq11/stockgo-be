@@ -11,6 +11,10 @@ export interface AuthRequest extends Request {
   };
 }
 
+const getJwtSecret = (): string => {
+  return process.env.JWT_SECRET || 'stockgo-default-jwt-secret-key-2024-development-only';
+};
+
 export const authenticate = async (
   req: AuthRequest,
   res: Response,
@@ -23,7 +27,7 @@ export const authenticate = async (
       return res.status(401).json({ error: 'Access token required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
+    const decoded = jwt.verify(token, getJwtSecret()) as any;
     req.user = {
       id: decoded.id,
       email: decoded.email,
