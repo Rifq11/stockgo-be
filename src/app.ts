@@ -38,7 +38,7 @@ app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/kurir', kurirRoutes);
 app.use('/api/expeditions', expeditionRoutes);
 
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     path: req.originalUrl 
