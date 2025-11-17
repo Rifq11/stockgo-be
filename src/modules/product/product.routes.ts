@@ -7,9 +7,9 @@ const router = Router();
 const productController = new ProductController();
 
 router.get('/', authenticate, productController.getProducts.bind(productController));
-router.get('/:id', authenticate, productController.getProductById.bind(productController));
 router.post('/', authenticate, authorize('admin'), productController.createProduct.bind(productController));
 router.post('/image', authenticate, authorize('admin'), uploadSingle, productController.addProductImage.bind(productController));
+router.get('/:id', authenticate, productController.getProductById.bind(productController));
 
 export default router;
 
