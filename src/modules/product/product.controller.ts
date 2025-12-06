@@ -2,6 +2,8 @@ import { Response } from 'express';
 import { AuthRequest } from '../../middleware/auth.middleware';
 import { sendSuccess, sendError } from '../../utils/response.util';
 import { ProductService } from './product.service';
+import { db } from '../../config/db';
+import { category } from '../../../drizzle/schema';
 
 const productService = new ProductService();
 
@@ -88,6 +90,73 @@ export class ProductController {
     } catch (error: any) {
       console.error('Add product image error:', error);
       return sendError(res, 'Failed to add product image', 500, error.message);
+    }
+  }
+
+  async updateProduct(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const { name, sku, category_id, description, unit, weight, dimensions, status } = req.body;
+
+      if (!id) {
+        return sendError(res, 'Product ID is required', 400);
+      }
+
+      const updatedProduct = await productService.updateProduct(parseInt(id), {
+        name,
+        sku,
+        category_id,
+        description,
+        unit,
+        weight,
+        dimensions,
+        status,
+      });
+
+      if (!updatedProduct) {
+        return sendError(res, 'Product not found', 404);
+      }
+
+      return sendSuccess(res, 'Product updated successfully', updatedProduct);
+    } catch (error: any) {
+      console.error('Update product error:', error);
+      return sendError(res, 'Failed to update product', 500, error.message);
+    }
+  }
+
+  async deleteProduct(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return sendError(res, 'Product ID is required', 400);
+      }
+
+      const product = await productService.getProductById(parseInt(id));
+      if (!product) {
+        return sendError(res, 'Product not found', 404);
+      }
+
+      await productService.deleteProduct(parseInt(id));
+
+      return sendSuccess(res, 'Product deleted successfully', { id: parseInt(id) });
+    } catch (error: any) {
+      console.error('Delete product error:', error);
+      return sendError(res, 'Failed to delete product', 500, error.message);
+    }
+  }
+
+  async getCategories(req: AuthRequest, res: Response) {
+    try {
+      const categories = await db
+        .select()
+        .from(category)
+        .orderBy(category.name);
+
+      return sendSuccess(res, 'Categories retrieved successfully', { categories });
+    } catch (error: any) {
+      console.error('Get categories error:', error);
+      return sendError(res, 'Failed to get categories', 500, error.message);
     }
   }
 }

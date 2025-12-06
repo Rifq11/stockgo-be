@@ -238,5 +238,78 @@ export class DeliveryController {
       return sendError(res, 'Failed to assign kurir', 500, error.message);
     }
   }
+
+  async updateDelivery(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const {
+        customer_id,
+        warehouse_id,
+        pickup_address,
+        delivery_address,
+        delivery_city,
+        delivery_province,
+        delivery_postal_code,
+        notes,
+        items,
+      } = req.body;
+
+      if (!id) {
+        return sendError(res, 'Delivery ID is required', 400);
+      }
+
+      const existingDelivery = await deliveryService.getDeliveryWithItems(parseInt(id));
+      if (!existingDelivery) {
+        return sendError(res, 'Delivery not found', 404);
+      }
+
+      const updatedDelivery = await deliveryService.updateDelivery(parseInt(id), {
+        customer_id,
+        warehouse_id,
+        pickup_address,
+        delivery_address,
+        delivery_city,
+        delivery_province,
+        delivery_postal_code,
+        notes,
+        items,
+      });
+
+      return sendSuccess(res, 'Delivery updated successfully', updatedDelivery);
+    } catch (error: any) {
+      console.error('Update delivery error:', error);
+      return sendError(res, 'Failed to update delivery', 500, error.message);
+    }
+  }
+
+  async cancelDelivery(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return sendError(res, 'Delivery ID is required', 400);
+      }
+
+      const existingDelivery = await deliveryService.getDeliveryWithItems(parseInt(id));
+      if (!existingDelivery) {
+        return sendError(res, 'Delivery not found', 404);
+      }
+
+      const cancelledDelivery = await deliveryService.cancelDelivery(parseInt(id));
+
+      // Add status history
+      await db.insert(deliveryStatusHistory).values({
+        delivery_id: parseInt(id),
+        status: 'cancelled',
+        notes: 'Delivery cancelled',
+        updated_by: req.user!.id,
+      });
+
+      return sendSuccess(res, 'Delivery cancelled successfully', cancelledDelivery);
+    } catch (error: any) {
+      console.error('Cancel delivery error:', error);
+      return sendError(res, 'Failed to cancel delivery', 500, error.message);
+    }
+  }
 }
 

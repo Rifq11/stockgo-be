@@ -27,6 +27,7 @@ import deliveryRoutes from './modules/delivery/delivery.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import mediaRoutes from './modules/media/media.routes';
 import productRoutes from './modules/product/product.routes';
+import reportRoutes from './modules/report/report.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
@@ -37,6 +38,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/kurir', kurirRoutes);
 app.use('/api/expeditions', expeditionRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ 

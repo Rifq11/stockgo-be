@@ -120,5 +120,48 @@ export class ProductService {
 
     return created;
   }
+
+  async updateProduct(productId: number, data: {
+    name?: string;
+    sku?: string;
+    category_id?: number;
+    description?: string;
+    unit?: string;
+    weight?: number;
+    dimensions?: string;
+    status?: string;
+  }) {
+    const updateData: any = {};
+    
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.sku !== undefined) updateData.sku = data.sku;
+    if (data.category_id !== undefined) updateData.category_id = data.category_id;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.unit !== undefined) updateData.unit = data.unit;
+    if (data.weight !== undefined) updateData.weight = data.weight.toString();
+    if (data.dimensions !== undefined) updateData.dimensions = data.dimensions;
+    if (data.status !== undefined) updateData.status = data.status as any;
+
+    await db
+      .update(product)
+      .set(updateData)
+      .where(eq(product.id, productId));
+
+    return this.getProductById(productId);
+  }
+
+  async deleteProduct(productId: number) {
+    // Delete product images first
+    await db
+      .delete(productImage)
+      .where(eq(productImage.product_id, productId));
+
+    // Delete product
+    await db
+      .delete(product)
+      .where(eq(product.id, productId));
+
+    return { success: true };
+  }
 }
 

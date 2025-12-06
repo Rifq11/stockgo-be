@@ -85,4 +85,35 @@ export class KurirController {
       return sendError(res, 'Failed to fetch kurir performance', 500, error.message);
     }
   }
+
+  async updatePerformance(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const { rating } = req.body;
+
+      if (!id) {
+        return sendError(res, 'Kurir ID is required', 400);
+      }
+
+      if (rating === undefined || rating === null) {
+        return sendError(res, 'Rating is required', 400);
+      }
+
+      const ratingNum = parseFloat(rating);
+      if (isNaN(ratingNum)) {
+        return sendError(res, 'Rating must be a valid number', 400);
+      }
+
+      const updatedKurir = await kurirService.updateKurirRating(parseInt(id), ratingNum);
+
+      if (!updatedKurir) {
+        return sendError(res, 'Kurir not found', 404);
+      }
+
+      return sendSuccess(res, 'Kurir rating updated successfully', updatedKurir);
+    } catch (error: any) {
+      console.error('Update kurir performance error:', error);
+      return sendError(res, error.message || 'Failed to update kurir rating', 500, error.message);
+    }
+  }
 }

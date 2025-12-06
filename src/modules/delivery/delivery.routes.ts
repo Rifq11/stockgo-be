@@ -12,8 +12,10 @@ router.get('/track/:tracking_number', deliveryController.getDeliveryByTracking.b
 router.post('/', authenticate, authorize('admin', 'dispatcher'), deliveryController.createDelivery.bind(deliveryController));
 router.get('/', authenticate, deliveryController.getDeliveries.bind(deliveryController));
 router.get('/:id', authenticate, deliveryController.getDeliveryById.bind(deliveryController));
+router.put('/:id', authenticate, authorize('admin', 'dispatcher'), deliveryController.updateDelivery.bind(deliveryController));
 router.put('/:id/status', authenticate, authorize('admin', 'kurir'), deliveryController.updateDeliveryStatus.bind(deliveryController));
 router.put('/:id/assign', authenticate, authorize('admin', 'dispatcher'), deliveryController.assignKurir.bind(deliveryController));
+router.delete('/:id', authenticate, authorize('admin', 'dispatcher'), deliveryController.cancelDelivery.bind(deliveryController));
 
 export default router;
 

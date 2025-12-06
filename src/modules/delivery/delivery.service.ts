@@ -149,5 +149,64 @@ export class DeliveryService {
     const deliveryId = deliveryData!.id;
     return this.getDeliveryWithItems(deliveryId);
   }
+
+  async updateDelivery(deliveryId: number, data: {
+    customer_id?: number;
+    warehouse_id?: number;
+    pickup_address?: string;
+    delivery_address?: string;
+    delivery_city?: string;
+    delivery_province?: string;
+    delivery_postal_code?: string;
+    notes?: string;
+    items?: CreateDeliveryItem[];
+  }) {
+    const updateData: any = {};
+    
+    if (data.customer_id !== undefined) updateData.customer_id = data.customer_id;
+    if (data.warehouse_id !== undefined) updateData.warehouse_id = data.warehouse_id;
+    if (data.pickup_address !== undefined) updateData.pickup_address = data.pickup_address;
+    if (data.delivery_address !== undefined) updateData.delivery_address = data.delivery_address;
+    if (data.delivery_city !== undefined) updateData.delivery_city = data.delivery_city;
+    if (data.delivery_province !== undefined) updateData.delivery_province = data.delivery_province;
+    if (data.delivery_postal_code !== undefined) updateData.delivery_postal_code = data.delivery_postal_code;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+
+    await db
+      .update(delivery)
+      .set(updateData)
+      .where(eq(delivery.id, deliveryId));
+
+    // Update items if provided
+    if (data.items && data.items.length > 0) {
+      // Delete existing items
+      await db
+        .delete(deliveryItem)
+        .where(eq(deliveryItem.delivery_id, deliveryId));
+
+      // Insert new items
+      const itemsToInsert = data.items.map((item) => ({
+        delivery_id: deliveryId,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price.toString(),
+        total_price: (item.quantity * item.unit_price).toString(),
+        notes: item.notes,
+      }));
+
+      await db.insert(deliveryItem).values(itemsToInsert);
+    }
+
+    return this.getDeliveryWithItems(deliveryId);
+  }
+
+  async cancelDelivery(deliveryId: number) {
+    await db
+      .update(delivery)
+      .set({ status: 'cancelled' })
+      .where(eq(delivery.id, deliveryId));
+
+    return this.getDeliveryWithItems(deliveryId);
+  }
 }
 
