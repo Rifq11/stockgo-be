@@ -34,7 +34,7 @@ npm install
 Buat file `.env` di root project dan tambahkan:
 
 ```env
-DATABASE_URL="mysql://USER:PASSWORD1@HOST:PORT/DATABASE"
+DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
 PORT=3000
 ```
 
