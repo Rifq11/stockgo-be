@@ -197,7 +197,17 @@ export class DeliveryController {
         updated_by: req.user!.id,
       });
 
-      return sendSuccess(res, 'Delivery status updated successfully', updatedDelivery);
+      const detail = await deliveryService.getDeliveryWithItems(updatedDelivery.id);
+      const statusHistory = await db
+        .select()
+        .from(deliveryStatusHistory)
+        .where(eq(deliveryStatusHistory.delivery_id, updatedDelivery.id))
+        .orderBy(desc(deliveryStatusHistory.created_at));
+
+      return sendSuccess(res, 'Delivery status updated successfully', {
+        ...detail,
+        status_history: statusHistory,
+      });
     } catch (error: any) {
       console.error('Update delivery status error:', error);
       return sendError(res, 'Failed to update delivery status', 500, error.message);

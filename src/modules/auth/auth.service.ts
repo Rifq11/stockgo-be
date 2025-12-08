@@ -1,6 +1,6 @@
 import { db } from '../../config/db';
 import { user, role } from '../../../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../../utils/jwt.util';
 
@@ -132,6 +132,36 @@ export class AuthService {
     }
 
     return userProfile;
+  }
+
+  async updateProfile(
+    userId: number,
+    payload: { full_name: string; email: string; phone?: string }
+  ) {
+    const [existing] = await db.select().from(user).where(eq(user.id, userId)).limit(1);
+    if (!existing) {
+      throw new Error('User not found');
+    }
+
+    const [emailOwner] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(and(eq(user.email, payload.email), eq(user.is_active, true)));
+
+    if (emailOwner && emailOwner.id !== userId) {
+      throw new Error('Email already in use');
+    }
+
+    await db
+      .update(user)
+      .set({
+        full_name: payload.full_name,
+        email: payload.email,
+        phone: payload.phone,
+      })
+      .where(eq(user.id, userId));
+
+    return this.getProfile(userId);
   }
 }
 

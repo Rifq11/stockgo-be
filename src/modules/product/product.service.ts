@@ -39,7 +39,7 @@ export class ProductService {
 
     return {
       ...productData.product,
-      category: productData.category,
+      category: productData.category.name,
     };
   }
 

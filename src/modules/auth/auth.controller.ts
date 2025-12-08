@@ -67,4 +67,29 @@ export class AuthController {
       return sendError(res, error.message || 'Failed to get profile', 404);
     }
   }
+
+  async updateProfile(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, 'User ID not found', 401);
+      }
+
+      const { full_name, email, phone } = req.body;
+      if (!full_name || !email) {
+        return sendError(res, 'Full name and email are required', 400);
+      }
+
+      const updatedProfile = await authService.updateProfile(userId, {
+        full_name,
+        email,
+        phone,
+      });
+
+      return sendSuccess(res, 'Profile updated successfully', updatedProfile);
+    } catch (error: any) {
+      console.error('Update profile error:', error);
+      return sendError(res, error.message || 'Failed to update profile', 400);
+    }
+  }
 }
