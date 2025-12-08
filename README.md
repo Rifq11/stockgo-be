@@ -71,6 +71,12 @@ Ini akan membuat:
 - Kurir 2: `kurir2@kurirbarang.com` / `password`
 - Petugas Gudang: `gudang@kurirbarang.com` / `password`
 
+Peran & penggunaan:
+- Admin (web): akses penuh dashboard/admin.
+- Dispatcher (web): kelola pengiriman/ekspedisi.
+- Petugas Gudang (web): kelola stok/warehouse.
+- Kurir (mobile): akses daftar pengiriman & tracking di aplikasi Android.
+
 ### 6. Jalankan aplikasi
 
 #### Development (dengan hot reload):
