@@ -36,8 +36,6 @@ Buat file `.env` di root project dan tambahkan:
 ```env
 DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
 PORT=3000
-# Folder upload untuk media (default ke public/uploads agar bisa diserve statis)
-UPLOAD_DIR="public/uploads"
 ```
 
 Ganti `USER`, `PASSWORD`, `HOST`, `PORT`, dan `DATABASE` sesuai konfigurasi MySQL Anda.
