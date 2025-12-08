@@ -73,12 +73,28 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
+    // Get default role (petugas_gudang) if role_id not provided
+    let finalRoleId = data.role_id;
+    if (!finalRoleId) {
+      const [petugasGudangRole] = await db
+        .select()
+        .from(role)
+        .where(eq(role.name, 'petugas_gudang'))
+        .limit(1);
+      
+      if (!petugasGudangRole) {
+        throw new Error('Default role (petugas_gudang) not found. Please contact administrator.');
+      }
+      
+      finalRoleId = petugasGudangRole.id;
+    }
+
     await db.insert(user).values({
       full_name: data.full_name,
       email: data.email,
       password: hashedPassword,
       phone: data.phone,
-      role_id: data.role_id || 4, // Default to petugas_gudang
+      role_id: finalRoleId,
       is_active: true,
     });
 
