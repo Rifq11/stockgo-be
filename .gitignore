@@ -12,9 +12,9 @@ yarn-error.log*
 .env.production.local
 
 # Build outputs
-dist/
-build/
-*.tsbuildinfo
+# dist/
+# build/
+# *.tsbuildinfo
 
 # Logs
 logs
