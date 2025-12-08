@@ -1,5 +1,5 @@
 import { db } from '../../config/db';
-import { delivery, deliveryItem, product, customer } from '../../../drizzle/schema';
+import { delivery, deliveryItem, product, customer, warehouse } from '../../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface CreateDeliveryItem {
@@ -68,9 +68,11 @@ export class DeliveryService {
       .select({
         delivery,
         customer,
+        warehouse,
       })
       .from(delivery)
       .leftJoin(customer, eq(delivery.customer_id, customer.id))
+      .leftJoin(warehouse, eq(delivery.warehouse_id, warehouse.id))
       .where(eq(delivery.id, deliveryId))
       .limit(1);
 
@@ -105,6 +107,7 @@ export class DeliveryService {
     return {
       delivery: record.delivery,
       customer: record.customer,
+      warehouse: record.warehouse,
       items,
     };
   }

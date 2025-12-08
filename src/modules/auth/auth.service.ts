@@ -73,20 +73,20 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Get default role (petugas_gudang) if role_id not provided
+    // Get default role (kurir) if role_id not provided
     let finalRoleId = data.role_id;
     if (!finalRoleId) {
-      const [petugasGudangRole] = await db
+      const [kurirRole] = await db
         .select()
         .from(role)
-        .where(eq(role.name, 'petugas_gudang'))
+        .where(eq(role.name, 'kurir'))
         .limit(1);
       
-      if (!petugasGudangRole) {
-        throw new Error('Default role (petugas_gudang) not found. Please contact administrator.');
+      if (!kurirRole) {
+        throw new Error('Default role (kurir) not found. Please contact administrator.');
       }
       
-      finalRoleId = petugasGudangRole.id;
+      finalRoleId = kurirRole.id;
     }
 
     await db.insert(user).values({

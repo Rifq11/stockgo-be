@@ -76,6 +76,11 @@ export class DeliveryController {
         conditions.push(eq(delivery.customer_id, parseInt(customer_id)));
       }
 
+      // Filter by kurir_id if user is kurir
+      if (req.user && req.user.role === 'kurir') {
+        conditions.push(eq(delivery.kurir_id, req.user.id));
+      }
+
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const deliveries = await db
@@ -147,6 +152,11 @@ export class DeliveryController {
 
       if (!deliveryData) {
         return sendError(res, 'Delivery not found', 404);
+      }
+
+      // Check if user is kurir and delivery is not assigned to them
+      if (req.user && req.user.role === 'kurir' && deliveryData.delivery.kurir_id !== req.user.id) {
+        return sendError(res, 'Access denied. This delivery is not assigned to you.', 403);
       }
 
       const statusHistory = await db
