@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middleware/auth.middleware';
 import { db } from '../../config/db';
-import { delivery, customer, user, deliveryStatusHistory } from '../../../drizzle/schema';
+import { delivery, customer, user, deliveryStatusHistory, kurir } from '../../../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { sendSuccess, sendError } from '../../utils/response.util';
 import { DeliveryService } from './delivery.service';
@@ -78,7 +78,25 @@ export class DeliveryController {
 
       // Filter by kurir_id if user is kurir
       if (req.user && req.user.role === 'kurir') {
-        conditions.push(eq(delivery.kurir_id, req.user.id));
+        // Get kurir.id from user.id
+        const [kurirData] = await db
+          .select({ id: kurir.id })
+          .from(kurir)
+          .where(eq(kurir.user_id, req.user.id))
+          .limit(1);
+        
+        if (kurirData) {
+          conditions.push(eq(delivery.kurir_id, kurirData.id));
+        } else {
+          // If kurir profile doesn't exist, return empty list
+          return sendSuccess(res, 'Deliveries retrieved successfully', {
+            deliveries: [],
+            pagination: {
+              page,
+              limit,
+            },
+          });
+        }
       }
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -87,18 +105,31 @@ export class DeliveryController {
         .select({
           delivery,
           customer,
-          kurir: user,
+          kurir: kurir,
+          kurirUser: user,
         })
         .from(delivery)
         .leftJoin(customer, eq(delivery.customer_id, customer.id))
-        .leftJoin(user, eq(delivery.kurir_id, user.id))
+        .leftJoin(kurir, eq(delivery.kurir_id, kurir.id))
+        .leftJoin(user, eq(kurir.user_id, user.id))
         .where(whereClause)
         .limit(limit)
         .offset(offset)
         .orderBy(desc(delivery.created_at));
 
+      // Map response to match frontend format
+      const mappedDeliveries = deliveries.map(d => ({
+        delivery: d.delivery,
+        customer: d.customer,
+        kurir: d.kurirUser ? {
+          id: d.kurirUser.id,
+          full_name: d.kurirUser.full_name,
+          phone: d.kurirUser.phone,
+        } : null,
+      }));
+
       return sendSuccess(res, 'Deliveries retrieved successfully', {
-        deliveries,
+        deliveries: mappedDeliveries,
         pagination: {
           page,
           limit,
@@ -155,8 +186,16 @@ export class DeliveryController {
       }
 
       // Check if user is kurir and delivery is not assigned to them
-      if (req.user && req.user.role === 'kurir' && deliveryData.delivery.kurir_id !== req.user.id) {
-        return sendError(res, 'Access denied. This delivery is not assigned to you.', 403);
+      if (req.user && req.user.role === 'kurir') {
+        const [kurirData] = await db
+          .select({ id: kurir.id })
+          .from(kurir)
+          .where(eq(kurir.user_id, req.user.id))
+          .limit(1);
+        
+        if (!kurirData || deliveryData.delivery.kurir_id !== kurirData.id) {
+          return sendError(res, 'Access denied. This delivery is not assigned to you.', 403);
+        }
       }
 
       const statusHistory = await db

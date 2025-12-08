@@ -129,7 +129,8 @@ export class KurirService {
     let nextNumber = 1;
     if (lastKurir.length > 0 && lastKurir[0]) {
       const lastEmployeeId = lastKurir[0].employee_id;
-      if (lastEmployeeId && lastEmployeeId.startsWith('KUR_')) {
+      // Support both old format (KUR_001) and new format (KUR-001)
+      if (lastEmployeeId && (lastEmployeeId.startsWith('KUR-') || lastEmployeeId.startsWith('KUR_'))) {
         const numStr = lastEmployeeId.substring(4);
         const parsed = parseInt(numStr);
         if (!isNaN(parsed)) {
@@ -138,7 +139,7 @@ export class KurirService {
       }
     }
 
-    const employeeId = `KUR_${nextNumber.toString().padStart(3, '0')}`;
+    const employeeId = `KUR-${nextNumber.toString().padStart(3, '0')}`;
 
     const [newKurir] = await db
       .insert(kurir)
