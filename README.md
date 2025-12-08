@@ -36,6 +36,8 @@ Buat file `.env` di root project dan tambahkan:
 ```env
 DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
 PORT=3000
+# Folder upload untuk media (default ke public/uploads agar bisa diserve statis)
+UPLOAD_DIR="public/uploads"
 ```
 
 Ganti `USER`, `PASSWORD`, `HOST`, `PORT`, dan `DATABASE` sesuai konfigurasi MySQL Anda.
@@ -153,6 +155,7 @@ Aplikasi akan berjalan di `http://localhost:3000` (atau port sesuai `.env`).
 - `GET /api/media/delivery/:delivery_id` — Get delivery media
 - `DELETE /api/media/:id` — Delete media file
 - `GET /api/media/serve/:type/:filename` — Serve media file
+
 
 ---
 

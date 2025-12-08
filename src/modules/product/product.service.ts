@@ -1,6 +1,6 @@
 import { db } from '../../config/db';
-import { product, productImage, category } from '../../../drizzle/schema';
-import { eq, and } from 'drizzle-orm';
+import { product, category } from '../../../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 export class ProductService {
   async getProductsWithImages(page: number = 1, limit: number = 10) {
@@ -16,26 +16,10 @@ export class ProductService {
       .limit(limit)
       .offset(offset);
 
-    const productsWithImages = await Promise.all(
-      products.map(async (p: { product: any; category: any }) => {
-      const images = await db
-        .select()
-        .from(productImage)
-        .where(eq(productImage.product_id, p.product.id))
-        .orderBy(productImage.is_primary);
-
-        return {
-          ...p.product,
-          category: p.category.name,
-          images: images.map((img: { image_url: string; api_url?: string | null }) => ({
-            ...img,
-            image_url: img.api_url || `/api/media/serve/product/${img.image_url.split('/').pop()}`
-          })),
-        };
-      })
-    );
-
-    return productsWithImages;
+    return products.map((p: { product: any; category: any }) => ({
+      ...p.product,
+      category: p.category.name,
+    }));
   }
 
   async getProductById(productId: number) {
@@ -53,19 +37,9 @@ export class ProductService {
       return null;
     }
 
-    const images = await db
-      .select()
-      .from(productImage)
-      .where(eq(productImage.product_id, productId))
-      .orderBy(productImage.is_primary);
-
     return {
       ...productData.product,
       category: productData.category,
-      images: images.map((img: { image_url: string; api_url?: string | null }) => ({
-        ...img,
-        image_url: img.api_url || `/api/media/serve/product/${img.image_url.split('/').pop()}`
-      })),
     };
   }
 
@@ -77,6 +51,7 @@ export class ProductService {
     unit: string;
     weight?: number;
     dimensions?: string;
+    image_url?: string;
   }) {
     await db
       .insert(product)
@@ -89,33 +64,13 @@ export class ProductService {
         weight: data.weight?.toString(),
         dimensions: data.dimensions,
         status: 'available',
+        image_url: data.image_url,
       });
 
     const [created] = await db
       .select()
       .from(product)
       .where(eq(product.sku, data.sku))
-      .limit(1);
-
-    return created;
-  }
-
-  async addProductImage(productId: number, imageUrl: string, apiUrl?: string, isPrimary: boolean = false) {
-    const apiUrlValue = apiUrl || `/api/media/serve/product/${imageUrl.split('/').pop()}`;
-    
-    await db
-      .insert(productImage)
-      .values({
-        product_id: productId,
-        image_url: imageUrl,
-        api_url: apiUrlValue,
-        is_primary: isPrimary,
-      });
-
-    const [created] = await db
-      .select()
-      .from(productImage)
-      .where(eq(productImage.image_url, imageUrl))
       .limit(1);
 
     return created;
@@ -130,6 +85,7 @@ export class ProductService {
     weight?: number;
     dimensions?: string;
     status?: string;
+    image_url?: string;
   }) {
     const updateData: any = {};
     
@@ -141,6 +97,7 @@ export class ProductService {
     if (data.weight !== undefined) updateData.weight = data.weight.toString();
     if (data.dimensions !== undefined) updateData.dimensions = data.dimensions;
     if (data.status !== undefined) updateData.status = data.status as any;
+    if (data.image_url !== undefined) updateData.image_url = data.image_url;
 
     await db
       .update(product)
@@ -151,12 +108,6 @@ export class ProductService {
   }
 
   async deleteProduct(productId: number) {
-    // Delete product images first
-    await db
-      .delete(productImage)
-      .where(eq(productImage.product_id, productId));
-
-    // Delete product
     await db
       .delete(product)
       .where(eq(product.id, productId));

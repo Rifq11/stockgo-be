@@ -13,11 +13,11 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const fileType: string = file.fieldname?.split('_')[0] || 'general';
     const dest = path.join(uploadDir, fileType);
-
+    
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(dest, { recursive: true });
     }
-
+    
     cb(null, dest);
   },
   filename: (req, file, cb) => {

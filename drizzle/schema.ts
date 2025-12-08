@@ -73,6 +73,7 @@ export const product = mysqlTable('product', {
     name: varchar('name', { length: 255 }).notNull(),
     sku: varchar('sku', { length: 100 }).notNull().unique(),
     barcode: varchar('barcode', { length: 100 }),
+    image_url: varchar('image_url', { length: 500 }),
     description: text('description'),
     category_id: int('category_id').notNull().references(() => category.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     unit: varchar('unit', { length: 50 }).notNull(),
@@ -183,17 +184,6 @@ export const deliveryMedia = mysqlTable('delivery_media', {
     file_name: varchar('file_name', { length: 255 }).notNull(),
     file_size: int('file_size'),
     uploaded_by: int('uploaded_by').notNull().references(() => user.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    ...timestamps
-});
-
-// Generic uploads (e.g., static assets)
-export const uploadFile = mysqlTable('upload_file', {
-    id: int('id').primaryKey().autoincrement(),
-    file_name: varchar('file_name', { length: 255 }).notNull(),
-    file_url: varchar('file_url', { length: 500 }).notNull(),
-    mime_type: varchar('mime_type', { length: 100 }).notNull(),
-    file_size: int('file_size'),
-    uploaded_by: int('uploaded_by').references(() => user.id, { onUpdate: 'cascade', onDelete: 'set null' }),
     ...timestamps
 });
 

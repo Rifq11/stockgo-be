@@ -50,7 +50,7 @@ export class ProductController {
 
   async createProduct(req: AuthRequest, res: Response) {
     try {
-      const { name, sku, category_id, description, unit, weight, dimensions } = req.body;
+      const { name, sku, category_id, description, unit, weight, dimensions, image_url } = req.body;
 
       if (!name || !sku || !category_id || !unit) {
         return sendError(res, 'Name, SKU, category, and unit are required', 400);
@@ -64,6 +64,7 @@ export class ProductController {
         unit,
         weight,
         dimensions,
+        image_url,
       });
 
       return sendSuccess(res, 'Product created successfully', newProduct, 201);
@@ -73,30 +74,10 @@ export class ProductController {
     }
   }
 
-  async addProductImage(req: AuthRequest, res: Response) {
-    try {
-      const { product_id, api_url } = req.body;
-      const file = req.file;
-
-      if (!product_id || !file) {
-        return sendError(res, 'Product ID and file are required', 400);
-      }
-
-      const finalApiUrl = api_url || `/api/media/serve/product/${file.filename}`;
-
-      const newImage = await productService.addProductImage(product_id, file.path, finalApiUrl);
-
-      return sendSuccess(res, 'Product image added successfully', newImage, 201);
-    } catch (error: any) {
-      console.error('Add product image error:', error);
-      return sendError(res, 'Failed to add product image', 500, error.message);
-    }
-  }
-
   async updateProduct(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const { name, sku, category_id, description, unit, weight, dimensions, status } = req.body;
+      const { name, sku, category_id, description, unit, weight, dimensions, status, image_url } = req.body;
 
       if (!id) {
         return sendError(res, 'Product ID is required', 400);
@@ -111,6 +92,7 @@ export class ProductController {
         weight,
         dimensions,
         status,
+        image_url,
       });
 
       if (!updatedProduct) {
