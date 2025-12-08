@@ -495,7 +495,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/deliveries?page=1&limit=10",
+							"raw": "{{base_url}}/api/deliveries?page=1&limit=10&status=pending",
 							"host": [
 								"{{base_url}}"
 							],
@@ -511,9 +511,22 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Optional: pending, picked_up, in_transit, delivered, failed, cancelled",
+									"disabled": false
+								},
+								{
+									"key": "customer_id",
+									"value": "",
+									"description": "Optional: filter by customer ID",
+									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "Get deliveries. For kurir role, automatically filters by kurir_id. For other roles, returns all deliveries."
 					},
 					"response": []
 				},
@@ -872,6 +885,63 @@
 					"response": []
 				},
 				{
+					"name": "Get Kurir Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/kurir/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kurir",
+								"me"
+							]
+						},
+						"description": "Get kurir profile for current logged in user (Mobile App)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Kurir Profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"license_number\": \"1234567890\",\n    \"vehicle_type\": \"Motor\",\n    \"vehicle_plate\": \"B 1234 XYZ\",\n    \"current_location\": \"-6.2088,106.8456\",\n    \"max_capacity\": \"50.00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kurir",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kurir"
+							]
+						},
+						"description": "Create kurir profile for current logged in user. Employee ID will be auto-generated (KUR-001, KUR-002, etc.)"
+					},
+					"response": []
+				},
+				{
 					"name": "Get Kurir By ID",
 					"request": {
 						"method": "GET",
@@ -892,6 +962,39 @@
 								"1"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Kurir Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"license_number\": \"9876543210\",\n    \"vehicle_type\": \"Mobil\",\n    \"vehicle_plate\": \"B 5678 ABC\",\n    \"current_location\": \"-6.2088,106.8456\",\n    \"max_capacity\": \"100.00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kurir/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kurir",
+								"1"
+							]
+						},
+						"description": "Update kurir profile (license, vehicle, location, max capacity)"
 					},
 					"response": []
 				},
