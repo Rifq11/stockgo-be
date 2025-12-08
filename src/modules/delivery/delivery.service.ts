@@ -1,5 +1,5 @@
 import { db } from '../../config/db';
-import { delivery, deliveryItem, product, productImage, customer } from '../../../drizzle/schema';
+import { delivery, deliveryItem, product, customer } from '../../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface CreateDeliveryItem {
@@ -94,44 +94,18 @@ export class DeliveryService {
           weight: product.weight,
           dimensions: product.dimensions,
           status: product.status,
+          image_url: product.image_url,
         },
       })
       .from(deliveryItem)
       .innerJoin(product, eq(deliveryItem.product_id, product.id))
       .where(eq(deliveryItem.delivery_id, deliveryId));
 
-    const itemsWithImages = await Promise.all(
-      items.map(async (item: {
-        id: number;
-        quantity: number;
-        unit_price: any;
-        total_price: any;
-        notes: string | null;
-        product: { id: number; name: string; sku: string; description: string | null; unit: string; weight: any; dimensions: string | null; status: any };
-      }) => {
-        const images = await db
-          .select()
-          .from(productImage)
-          .where(eq(productImage.product_id, item.product.id));
-
-        return {
-          ...item,
-          product: {
-            ...item.product,
-            images: images.map((img: { image_url: string; api_url?: string | null }) => ({
-              ...img,
-              image_url: img.api_url || `/api/media/serve/product/${img.image_url.split('/').pop()}`
-            })),
-          },
-        };
-      })
-    );
-
     const record = deliveryData[0]!;
     return {
       delivery: record.delivery,
       customer: record.customer,
-      items: itemsWithImages,
+      items,
     };
   }
 

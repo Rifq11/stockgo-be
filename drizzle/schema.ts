@@ -83,15 +83,6 @@ export const product = mysqlTable('product', {
     ...timestamps
 });
 
-export const productImage = mysqlTable('product_image', {
-    id: int('id').primaryKey().autoincrement(),
-    product_id: int('product_id').notNull().references(() => product.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    image_url: varchar('image_url', { length: 500 }).notNull(),
-    api_url: varchar('api_url', { length: 500 }),
-    is_primary: boolean('is_primary').notNull().default(false),
-    ...timestamps
-});
-
 export const inventory = mysqlTable('inventory', {
     id: int('id').primaryKey().autoincrement(),
     warehouse_id: int('warehouse_id').notNull().references(() => warehouse.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
@@ -299,16 +290,8 @@ export const productRelations = relations(product, ({ one, many }) => ({
         fields: [product.category_id],
         references: [category.id]
     }),
-    images: many(productImage),
     inventories: many(inventory),
     deliveryItems: many(deliveryItem)
-}));
-
-export const productImageRelations = relations(productImage, ({ one }) => ({
-    product: one(product, {
-        fields: [productImage.product_id],
-        references: [product.id]
-    })
 }));
 
 export const inventoryRelations = relations(inventory, ({ one, many }) => ({
