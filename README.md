@@ -1,6 +1,6 @@
 # StockGo-Be
 
-Backend API for Warehouse and Delivery Management System built with Express, TypeScript, and Drizzle ORM (MySQL) for SMKN 24 Jakarta - Kelompok 09.
+Backend API for Warehouse and Delivery Management System built with Express, TypeScript, and Drizzle ORM (MySQL)
 
 ## Features
 
@@ -293,7 +293,3 @@ Sistem ini dirancang khusus untuk **distributor** yang membutuhkan:
 3. Commit changes
 4. Push to branch
 5. Create Pull Request
-
-## License
-
-ISC License - SMKN 24 Jakarta Kelompok 09
