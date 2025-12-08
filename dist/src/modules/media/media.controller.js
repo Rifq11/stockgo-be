@@ -97,7 +97,10 @@ class MediaController {
                 return (0, response_util_1.sendError)(res, 'Filename is required', 400);
             }
             const folder = type || 'delivery';
-            const filePath = path_1.default.join(process.env.UPLOAD_DIR || 'uploads', folder, filename);
+            const baseUploadDir = process.env.UPLOAD_DIR
+                ? process.env.UPLOAD_DIR
+                : path_1.default.resolve(__dirname, '../../../../public/uploads');
+            const filePath = path_1.default.join(baseUploadDir, folder, filename);
             if (!fs_1.default.existsSync(filePath)) {
                 return (0, response_util_1.sendError)(res, 'File not found', 404);
             }

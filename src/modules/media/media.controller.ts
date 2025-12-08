@@ -106,7 +106,12 @@ export class MediaController {
         return sendError(res, 'Filename is required', 400);
       }
       const folder = (type as string) || 'delivery';
-      const filePath = path.join(process.env.UPLOAD_DIR || 'uploads', folder, filename);
+      // Use __dirname to ensure correct path in production (cPanel)
+      // __dirname in compiled JS will be dist/src/modules/media, so we go up 4 levels to reach root
+      const baseUploadDir = process.env.UPLOAD_DIR 
+        ? process.env.UPLOAD_DIR 
+        : path.resolve(__dirname, '../../../../public/uploads');
+      const filePath = path.join(baseUploadDir, folder, filename);
 
       if (!fs.existsSync(filePath)) {
         return sendError(res, 'File not found', 404);

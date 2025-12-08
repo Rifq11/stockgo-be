@@ -7,7 +7,13 @@ exports.uploadSingle = exports.uploadDeliveryMedia = exports.upload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const uploadDir = process.env.UPLOAD_DIR ?? path_1.default.join('public', 'uploads');
+const getUploadDir = () => {
+    if (process.env.UPLOAD_DIR) {
+        return process.env.UPLOAD_DIR;
+    }
+    return path_1.default.resolve(__dirname, '../../../public/uploads');
+};
+const uploadDir = getUploadDir();
 if (!fs_1.default.existsSync(uploadDir)) {
     fs_1.default.mkdirSync(uploadDir, { recursive: true });
 }

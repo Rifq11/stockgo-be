@@ -10,7 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(process.env.UPLOAD_DIR || 'public/uploads')));
+// Use __dirname to ensure correct path in production (cPanel)
+// __dirname in compiled JS will be dist/src, so we go up 2 levels to reach root
+app.use('/uploads', express.static(path.resolve(__dirname, '../../public/uploads')));
 
 app.get('/health', (req, res) => {
   res.json({ 

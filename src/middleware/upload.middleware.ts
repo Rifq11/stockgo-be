@@ -2,8 +2,17 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// default path to uploads directory
-const uploadDir: string = process.env.UPLOAD_DIR ?? path.join('public', 'uploads');
+// Use __dirname to ensure correct path in production (cPanel)
+// __dirname in compiled JS will be dist/src/middleware, so we go up 3 levels to reach root
+const getUploadDir = (): string => {
+  if (process.env.UPLOAD_DIR) {
+    return process.env.UPLOAD_DIR;
+  }
+  // In compiled JS: dist/src/middleware -> ../../.. -> root -> public/uploads
+  return path.resolve(__dirname, '../../../public/uploads');
+};
+
+const uploadDir: string = getUploadDir();
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
