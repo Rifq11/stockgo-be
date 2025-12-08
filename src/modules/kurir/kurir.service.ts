@@ -141,7 +141,8 @@ export class KurirService {
       return this.getKurirByUserId(userId);
     } else {
       // Create new kurir
-      const [newKurir] = await db
+      // MySQL doesn't support .returning(), so we insert and then query
+      await db
         .insert(kurir)
         .values({
           user_id: userId,
@@ -151,10 +152,10 @@ export class KurirService {
           vehicle_plate: data.vehicle_plate,
           max_capacity: data.max_capacity?.toString(),
           status: 'available' as any,
-        })
-        .returning();
+        });
 
-      return this.getKurirById(newKurir.id);
+      // Get the newly created kurir by user_id
+      return this.getKurirByUserId(userId);
     }
   }
 }

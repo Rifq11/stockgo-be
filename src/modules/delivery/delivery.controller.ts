@@ -85,8 +85,9 @@ export class DeliveryController {
           .where(eq(kurir.user_id, req.user.id))
           .limit(1);
         
-        if (kurirRecord.length > 0) {
-          conditions.push(eq(delivery.kurir_id, kurirRecord[0].id));
+        const kurirId = kurirRecord[0]?.id;
+        if (kurirId) {
+          conditions.push(eq(delivery.kurir_id, kurirId));
         } else {
           // If kurir record doesn't exist, return empty list
           return sendSuccess(res, 'Deliveries retrieved successfully', {
@@ -105,11 +106,13 @@ export class DeliveryController {
         .select({
           delivery,
           customer,
-          kurir: user,
+          kurir: kurir,
+          kurirUser: user,
         })
         .from(delivery)
         .leftJoin(customer, eq(delivery.customer_id, customer.id))
-        .leftJoin(user, eq(delivery.kurir_id, user.id))
+        .leftJoin(kurir, eq(delivery.kurir_id, kurir.id))
+        .leftJoin(user, eq(kurir.user_id, user.id))
         .where(whereClause)
         .limit(limit)
         .offset(offset)
