@@ -244,6 +244,38 @@
 					"response": []
 				},
 				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"full_name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"phone\": \"081234567890\",\n    \"password\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Logout",
 					"request": {
 						"method": "POST",
@@ -595,6 +627,62 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update Delivery",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customer_id\": 1,\n    \"warehouse_id\": 1,\n    \"pickup_address\": \"Gudang Pusat Updated\",\n    \"delivery_address\": \"Jl. Customer Updated No.456\",\n    \"delivery_city\": \"Jakarta\",\n    \"delivery_province\": \"DKI Jakarta\",\n    \"delivery_postal_code\": \"12345\",\n    \"notes\": \"Barang sudah diupdate\",\n    \"items\": [\n        {\n            \"product_id\": 1,\n            \"quantity\": 15,\n            \"unit_price\": 50000,\n            \"notes\": \"Barang cepat\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"deliveries",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Delivery",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/deliveries/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"deliveries",
+								"1"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -864,6 +952,39 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update Kurir Performance",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4.5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kurir/1/performance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kurir",
+								"1",
+								"performance"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1036,6 +1157,30 @@
 			"name": "Product",
 			"item": [
 				{
+					"name": "Get Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Products",
 					"request": {
 						"method": "GET",
@@ -1124,6 +1269,62 @@
 					"response": []
 				},
 				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Product A\",\n    \"sku\": \"PROD-001-UPDATED\",\n    \"category_id\": 1,\n    \"description\": \"Updated product description\",\n    \"unit\": \"pcs\",\n    \"weight\": 2.0,\n    \"dimensions\": \"25x35x45\",\n    \"status\": \"active\",\n    \"image_url\": \"https://example.com/image.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Upload Product Image",
 					"request": {
 						"method": "POST",
@@ -1172,7 +1373,7 @@
 			]
 		},
 		{
-			"name": "📊 Dashboard & Analytics",
+			"name": "Dashboard & Analytics",
 			"item": [
 				{
 					"name": "Get Dashboard Stats",
@@ -1311,7 +1512,7 @@
 			]
 		},
 		{
-			"name": "📁 Media Management",
+			"name": "Media",
 			"item": [
 				{
 					"name": "Upload Delivery Media",
@@ -1428,10 +1629,176 @@
 			]
 		},
 		{
-			"name": "🏥 Health Check",
+			"name": "Reports",
 			"item": [
 				{
-					"name": "Health",
+					"name": "Get Delivery Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/delivery?start_date=2024-01-01&end_date=2024-01-31&warehouse_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"delivery"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "warehouse_id",
+									"value": "1",
+									"description": "Optional"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Kurir Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/kurir?start_date=2024-01-01&end_date=2024-01-31&kurir_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"kurir"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "kurir_id",
+									"value": "1",
+									"description": "Optional"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/product?start_date=2024-01-01&end_date=2024-01-31&warehouse_id=1&category_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"product"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "warehouse_id",
+									"value": "1",
+									"description": "Optional"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"description": "Optional"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Warehouse Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reports/warehouse?start_date=2024-01-01&end_date=2024-01-31&warehouse_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"warehouse"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "warehouse_id",
+									"value": "1",
+									"description": "Optional"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Health Check",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1443,7 +1810,8 @@
 							"path": [
 								"health"
 							]
-						}
+						},
+						"description": "Check if API is running"
 					},
 					"response": []
 				}
