@@ -12,8 +12,8 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-app.use('/uploads', express_1.default.static(path_1.default.resolve(__dirname, '../../public/uploads')));
-app.get('/health', (req, res) => {
+app.use('/stockgo/uploads', express_1.default.static(path_1.default.resolve(__dirname, '../../public/uploads')));
+app.get('/stockgo/health', (req, res) => {
     res.json({
         status: 'OK',
         message: 'Kurir Barang API is running',
@@ -30,16 +30,16 @@ const dashboard_routes_1 = __importDefault(require("./modules/dashboard/dashboar
 const media_routes_1 = __importDefault(require("./modules/media/media.routes"));
 const product_routes_1 = __importDefault(require("./modules/product/product.routes"));
 const report_routes_1 = __importDefault(require("./modules/report/report.routes"));
-app.use('/api/auth', auth_routes_1.default);
-app.use('/api/customers', customer_routes_1.default);
-app.use('/api/deliveries', delivery_routes_1.default);
-app.use('/api/dashboard', dashboard_routes_1.default);
-app.use('/api/media', media_routes_1.default);
-app.use('/api/products', product_routes_1.default);
-app.use('/api/warehouses', warehouse_routes_1.default);
-app.use('/api/kurir', kurir_routes_1.default);
-app.use('/api/expeditions', expedition_routes_1.default);
-app.use('/api/reports', report_routes_1.default);
+app.use('/stockgo/api/auth', auth_routes_1.default);
+app.use('/stockgo/api/customers', customer_routes_1.default);
+app.use('/stockgo/api/deliveries', delivery_routes_1.default);
+app.use('/stockgo/api/dashboard', dashboard_routes_1.default);
+app.use('/stockgo/api/media', media_routes_1.default);
+app.use('/stockgo/api/products', product_routes_1.default);
+app.use('/stockgo/api/warehouses', warehouse_routes_1.default);
+app.use('/stockgo/api/kurir', kurir_routes_1.default);
+app.use('/stockgo/api/expeditions', expedition_routes_1.default);
+app.use('/stockgo/api/reports', report_routes_1.default);
 app.use((req, res) => {
     res.status(404).json({
         error: 'Route not found',
