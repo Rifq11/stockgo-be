@@ -2,7 +2,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-const uploadDir: string = process.env.UPLOAD_DIR ?? 'uploads';
+// Default to public/uploads so assets can be statically served
+const uploadDir: string = process.env.UPLOAD_DIR ?? path.join('public', 'uploads');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -10,20 +11,20 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const fileType: string = file.fieldname?.split('_')[0] ?? 'misc';
-    const dest = path.join(uploadDir as string, fileType as string);
-    
+    const fileType: string = file.fieldname?.split('_')[0] || 'general';
+    const dest = path.join(uploadDir, fileType);
+
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(dest, { recursive: true });
     }
-    
+
     cb(null, dest);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
+    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+  },
 });
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {

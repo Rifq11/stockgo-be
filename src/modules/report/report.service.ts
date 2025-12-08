@@ -177,7 +177,7 @@ export class ReportService {
       products,
       summary: {
         total_products: products.length,
-        total_quantity,
+        total_quantity: totalQuantity,
       },
     };
   }
@@ -207,8 +207,8 @@ export class ReportService {
       .where(whereClause);
 
     // Group by warehouse
-    const warehouseStats = deliveries.reduce((acc: any, d: any) => {
-      const whId = d.warehouse?.id || 'unknown';
+    const warehouseStats = deliveries.reduce((acc: Record<string, any>, d: any) => {
+      const whId = (d.warehouse?.id ?? 'unknown').toString();
       const whName = d.warehouse?.name || 'Unknown';
       
       if (!acc[whId]) {
@@ -238,12 +238,14 @@ export class ReportService {
 
   private groupByPeriod(deliveries: any[], startDate?: string, endDate?: string) {
     // Group by week
-    const periods: any = {};
+    const periods: Record<string, any> = {};
     
     deliveries.forEach(delivery => {
+      if (!delivery?.created_at) return;
       const date = new Date(delivery.created_at);
       const weekStart = this.getWeekStart(date);
-      const weekKey = weekStart.toISOString().split('T')[0];
+      const [weekKey] = weekStart.toISOString().split('T');
+      if (!weekKey) return;
       
       if (!periods[weekKey]) {
         periods[weekKey] = {
@@ -255,13 +257,14 @@ export class ReportService {
         };
       }
       
-      periods[weekKey].total++;
+      const period = periods[weekKey]!;
+      period.total++;
       if (delivery.status === 'delivered') {
-        periods[weekKey].successful++;
+        period.successful++;
       } else if (['pending', 'picked_up', 'in_transit'].includes(delivery.status)) {
-        periods[weekKey].in_progress++;
+        period.in_progress++;
       } else if (['failed', 'cancelled'].includes(delivery.status)) {
-        periods[weekKey].failed++;
+        period.failed++;
       }
     });
 

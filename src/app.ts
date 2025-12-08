@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -9,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(process.env.UPLOAD_DIR || 'public/uploads')));
 
 app.get('/health', (req, res) => {
   res.json({ 
@@ -28,6 +30,7 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import mediaRoutes from './modules/media/media.routes';
 import productRoutes from './modules/product/product.routes';
 import reportRoutes from './modules/report/report.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
@@ -39,6 +42,7 @@ app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/kurir', kurirRoutes);
 app.use('/api/expeditions', expeditionRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ 

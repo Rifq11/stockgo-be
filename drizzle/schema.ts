@@ -186,6 +186,17 @@ export const deliveryMedia = mysqlTable('delivery_media', {
     ...timestamps
 });
 
+// Generic uploads (e.g., static assets)
+export const uploadFile = mysqlTable('upload_file', {
+    id: int('id').primaryKey().autoincrement(),
+    file_name: varchar('file_name', { length: 255 }).notNull(),
+    file_url: varchar('file_url', { length: 500 }).notNull(),
+    mime_type: varchar('mime_type', { length: 100 }).notNull(),
+    file_size: int('file_size'),
+    uploaded_by: int('uploaded_by').references(() => user.id, { onUpdate: 'cascade', onDelete: 'set null' }),
+    ...timestamps
+});
+
 export const expedition = mysqlTable('expedition', {
     id: int('id').primaryKey().autoincrement(),
     expedition_code: varchar('expedition_code', { length: 50 }).notNull().unique(),
