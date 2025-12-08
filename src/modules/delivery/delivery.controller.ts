@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middleware/auth.middleware';
 import { db } from '../../config/db';
-import { delivery, customer, user, deliveryStatusHistory } from '../../../drizzle/schema';
+import { delivery, customer, user, deliveryStatusHistory, kurir } from '../../../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { sendSuccess, sendError } from '../../utils/response.util';
 import { DeliveryService } from './delivery.service';
@@ -77,8 +77,26 @@ export class DeliveryController {
       }
 
       // Filter by kurir_id if user is kurir
+      // Get kurir.id from user.id, not user.id directly
       if (req.user && req.user.role === 'kurir') {
-        conditions.push(eq(delivery.kurir_id, req.user.id));
+        const kurirRecord = await db
+          .select({ id: kurir.id })
+          .from(kurir)
+          .where(eq(kurir.user_id, req.user.id))
+          .limit(1);
+        
+        if (kurirRecord.length > 0) {
+          conditions.push(eq(delivery.kurir_id, kurirRecord[0].id));
+        } else {
+          // If kurir record doesn't exist, return empty list
+          return sendSuccess(res, 'Deliveries retrieved successfully', {
+            deliveries: [],
+            pagination: {
+              page,
+              limit,
+            },
+          });
+        }
       }
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

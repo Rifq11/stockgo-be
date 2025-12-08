@@ -90,5 +90,72 @@ export class KurirService {
 
     return this.getKurirById(id);
   }
+
+  async getKurirByUserId(userId: number) {
+    const [foundKurir] = await db
+      .select({
+        kurir,
+        user,
+      })
+      .from(kurir)
+      .innerJoin(user, eq(kurir.user_id, user.id))
+      .where(eq(kurir.user_id, userId))
+      .limit(1);
+
+    if (!foundKurir) {
+      return null;
+    }
+
+    return {
+      ...foundKurir.kurir,
+      user: foundKurir.user,
+    };
+  }
+
+  async createOrUpdateKurirProfile(
+    userId: number,
+    data: {
+      employee_id: string;
+      license_number?: string;
+      vehicle_type?: string;
+      vehicle_plate?: string;
+      max_capacity?: number;
+    }
+  ) {
+    // Check if kurir already exists
+    const existingKurir = await this.getKurirByUserId(userId);
+
+    if (existingKurir) {
+      // Update existing kurir
+      await db
+        .update(kurir)
+        .set({
+          employee_id: data.employee_id,
+          license_number: data.license_number,
+          vehicle_type: data.vehicle_type,
+          vehicle_plate: data.vehicle_plate,
+          max_capacity: data.max_capacity?.toString(),
+        })
+        .where(eq(kurir.user_id, userId));
+
+      return this.getKurirByUserId(userId);
+    } else {
+      // Create new kurir
+      const [newKurir] = await db
+        .insert(kurir)
+        .values({
+          user_id: userId,
+          employee_id: data.employee_id,
+          license_number: data.license_number,
+          vehicle_type: data.vehicle_type,
+          vehicle_plate: data.vehicle_plate,
+          max_capacity: data.max_capacity?.toString(),
+          status: 'available' as any,
+        })
+        .returning();
+
+      return this.getKurirById(newKurir.id);
+    }
+  }
 }
 

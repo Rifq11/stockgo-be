@@ -116,4 +116,46 @@ export class KurirController {
       return sendError(res, error.message || 'Failed to update kurir rating', 500, error.message);
     }
   }
+
+  async getMyProfile(req: AuthRequest, res: Response) {
+    try {
+      if (!req.user) {
+        return sendError(res, 'Not authenticated', 401);
+      }
+
+      const kurirProfile = await kurirService.getKurirByUserId(req.user.id);
+
+      return sendSuccess(res, 'Kurir profile retrieved successfully', kurirProfile);
+    } catch (error: any) {
+      console.error('Get kurir profile error:', error);
+      return sendError(res, 'Failed to fetch kurir profile', 500, error.message);
+    }
+  }
+
+  async createOrUpdateProfile(req: AuthRequest, res: Response) {
+    try {
+      if (!req.user) {
+        return sendError(res, 'Not authenticated', 401);
+      }
+
+      const { employee_id, license_number, vehicle_type, vehicle_plate, max_capacity } = req.body;
+
+      if (!employee_id) {
+        return sendError(res, 'Employee ID is required', 400);
+      }
+
+      const kurirProfile = await kurirService.createOrUpdateKurirProfile(req.user.id, {
+        employee_id,
+        license_number,
+        vehicle_type,
+        vehicle_plate,
+        max_capacity: max_capacity ? parseFloat(max_capacity) : undefined,
+      });
+
+      return sendSuccess(res, 'Kurir profile updated successfully', kurirProfile);
+    } catch (error: any) {
+      console.error('Create/update kurir profile error:', error);
+      return sendError(res, error.message || 'Failed to update kurir profile', 500, error.message);
+    }
+  }
 }
