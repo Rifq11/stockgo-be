@@ -144,13 +144,22 @@ export class KurirController {
         return sendError(res, 'Employee ID is required', 400);
       }
 
-      const kurirProfile = await kurirService.createOrUpdateKurirProfile(req.user.id, {
+      const profileData: {
+        employee_id: string;
+        license_number?: string;
+        vehicle_type?: string;
+        vehicle_plate?: string;
+        max_capacity?: number;
+      } = {
         employee_id,
-        license_number,
-        vehicle_type,
-        vehicle_plate,
-        max_capacity: max_capacity ? parseFloat(max_capacity) : undefined,
-      });
+      };
+      
+      if (license_number) profileData.license_number = license_number;
+      if (vehicle_type) profileData.vehicle_type = vehicle_type;
+      if (vehicle_plate) profileData.vehicle_plate = vehicle_plate;
+      if (max_capacity) profileData.max_capacity = parseFloat(max_capacity);
+
+      const kurirProfile = await kurirService.createOrUpdateKurirProfile(req.user.id, profileData);
 
       return sendSuccess(res, 'Kurir profile updated successfully', kurirProfile);
     } catch (error: any) {
