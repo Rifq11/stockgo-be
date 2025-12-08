@@ -1,6 +1,6 @@
 import { db } from '../../config/db';
 import { kurir, user } from '../../../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 export class KurirService {
   async getKurirs(page: number = 1, limit: number = 10) {
@@ -85,6 +85,97 @@ export class KurirService {
       .update(kurir)
       .set({
         rating: rating.toString(),
+      })
+      .where(eq(kurir.id, id));
+
+    return this.getKurirById(id);
+  }
+
+  async getKurirByUserId(userId: number) {
+    const [foundKurir] = await db
+      .select({
+        kurir,
+        user,
+      })
+      .from(kurir)
+      .innerJoin(user, eq(kurir.user_id, user.id))
+      .where(eq(kurir.user_id, userId))
+      .limit(1);
+
+    if (!foundKurir) {
+      return null;
+    }
+
+    return {
+      ...foundKurir.kurir,
+      user: foundKurir.user,
+    };
+  }
+
+  async createKurir(userId: number, data: {
+    license_number?: string;
+    vehicle_type?: string;
+    vehicle_plate?: string;
+    current_location?: string;
+    max_capacity?: string;
+  }) {
+    // Generate employee_id
+    const lastKurir = await db
+      .select()
+      .from(kurir)
+      .orderBy(desc(kurir.id))
+      .limit(1);
+
+    let nextNumber = 1;
+    if (lastKurir.length > 0 && lastKurir[0]) {
+      const lastEmployeeId = lastKurir[0].employee_id;
+      if (lastEmployeeId && lastEmployeeId.startsWith('KUR_')) {
+        const numStr = lastEmployeeId.substring(4);
+        const parsed = parseInt(numStr);
+        if (!isNaN(parsed)) {
+          nextNumber = parsed + 1;
+        }
+      }
+    }
+
+    const employeeId = `KUR_${nextNumber.toString().padStart(3, '0')}`;
+
+    const [newKurir] = await db
+      .insert(kurir)
+      .values({
+        user_id: userId,
+        employee_id: employeeId,
+        license_number: data.license_number || null,
+        vehicle_type: data.vehicle_type || null,
+        vehicle_plate: data.vehicle_plate || null,
+        current_location: data.current_location || null,
+        max_capacity: data.max_capacity || null,
+        status: 'available',
+      })
+      .$returningId();
+
+    if (!newKurir || !newKurir.id) {
+      throw new Error('Failed to create kurir profile');
+    }
+
+    return this.getKurirById(newKurir.id);
+  }
+
+  async updateKurir(id: number, data: {
+    license_number?: string;
+    vehicle_type?: string;
+    vehicle_plate?: string;
+    current_location?: string;
+    max_capacity?: string;
+  }) {
+    await db
+      .update(kurir)
+      .set({
+        ...(data.license_number !== undefined && { license_number: data.license_number }),
+        ...(data.vehicle_type !== undefined && { vehicle_type: data.vehicle_type }),
+        ...(data.vehicle_plate !== undefined && { vehicle_plate: data.vehicle_plate }),
+        ...(data.current_location !== undefined && { current_location: data.current_location }),
+        ...(data.max_capacity !== undefined && { max_capacity: data.max_capacity }),
       })
       .where(eq(kurir.id, id));
 

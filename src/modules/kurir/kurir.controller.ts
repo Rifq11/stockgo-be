@@ -116,4 +116,80 @@ export class KurirController {
       return sendError(res, error.message || 'Failed to update kurir rating', 500, error.message);
     }
   }
+
+  async getByUserId(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, 'User ID is required', 400);
+      }
+
+      const kurirData = await kurirService.getKurirByUserId(userId);
+
+      if (!kurirData) {
+        return sendError(res, 'Kurir profile not found', 404);
+      }
+
+      return sendSuccess(res, 'Kurir retrieved successfully', kurirData);
+    } catch (error: any) {
+      console.error('Get kurir by user ID error:', error);
+      return sendError(res, 'Failed to fetch kurir', 500, error.message);
+    }
+  }
+
+  async create(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, 'User ID is required', 400);
+      }
+
+      const { license_number, vehicle_type, vehicle_plate, current_location, max_capacity } = req.body;
+
+      const newKurir = await kurirService.createKurir(userId, {
+        license_number,
+        vehicle_type,
+        vehicle_plate,
+        current_location,
+        max_capacity,
+      });
+
+      if (!newKurir) {
+        return sendError(res, 'Failed to create kurir profile', 500);
+      }
+
+      return sendSuccess(res, 'Kurir profile created successfully', newKurir);
+    } catch (error: any) {
+      console.error('Create kurir error:', error);
+      return sendError(res, error.message || 'Failed to create kurir profile', 500, error.message);
+    }
+  }
+
+  async update(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const { license_number, vehicle_type, vehicle_plate, current_location, max_capacity } = req.body;
+
+      if (!id) {
+        return sendError(res, 'Kurir ID is required', 400);
+      }
+
+      const updatedKurir = await kurirService.updateKurir(parseInt(id), {
+        license_number,
+        vehicle_type,
+        vehicle_plate,
+        current_location,
+        max_capacity,
+      });
+
+      if (!updatedKurir) {
+        return sendError(res, 'Kurir not found', 404);
+      }
+
+      return sendSuccess(res, 'Kurir profile updated successfully', updatedKurir);
+    } catch (error: any) {
+      console.error('Update kurir error:', error);
+      return sendError(res, error.message || 'Failed to update kurir profile', 500, error.message);
+    }
+  }
 }

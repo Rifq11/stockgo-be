@@ -127,7 +127,7 @@ export const delivery = mysqlTable('delivery', {
     tracking_number: varchar('tracking_number', { length: 50 }).notNull().unique(),
     customer_id: int('customer_id').notNull().references(() => customer.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     warehouse_id: int('warehouse_id').notNull().references(() => warehouse.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    kurir_id: int('kurir_id').references(() => user.id, { onUpdate: 'cascade', onDelete: 'set null' }),
+    kurir_id: int('kurir_id').references(() => kurir.id, { onUpdate: 'cascade', onDelete: 'set null' }),
     status: deliveryStatusEnum.notNull().default('pending'),
     pickup_address: text('pickup_address').notNull(),
     delivery_address: text('delivery_address').notNull(),
