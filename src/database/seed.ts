@@ -156,6 +156,7 @@ async function seed() {
         weight: 2.5.toString(),
         dimensions: '35x25x5',
         status: 'available' as any,
+        image_url: '/uploads/random_wallpaper-1.png',
       },
       {
         name: 'Kaos Kaki',
@@ -166,6 +167,7 @@ async function seed() {
         weight: 0.1.toString(),
         dimensions: '20x15x5',
         status: 'available' as any,
+        image_url: '/uploads/random_wallpaper.jpg',
       },
       {
         name: 'Susu UHT',
@@ -176,6 +178,7 @@ async function seed() {
         weight: 1.2.toString(),
         dimensions: '10x10x25',
         status: 'available' as any,
+        image_url: '/uploads/random_wallpaper.png',
       },
       {
         name: 'Mainan Robot',
@@ -186,6 +189,7 @@ async function seed() {
         weight: 0.8.toString(),
         dimensions: '30x20x15',
         status: 'available' as any,
+        image_url: '/uploads/random_wallpaper.png',
       },
     ]);
     console.log('✅ Products created\n');
