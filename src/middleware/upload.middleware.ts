@@ -2,7 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Default to public/uploads so assets can be statically served
+// default path to uploads directory
 const uploadDir: string = process.env.UPLOAD_DIR ?? path.join('public', 'uploads');
 
 if (!fs.existsSync(uploadDir)) {

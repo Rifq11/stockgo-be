@@ -56,14 +56,12 @@ export class KurirService {
   }
 
   async getKurirPerformance(id: number, startDate?: string, endDate?: string) {
-    // Get kurir data
     const kurirData = await this.getKurirById(id);
 
     if (!kurirData) {
       return null;
     }
 
-    // Calculate performance (dummy data - implement real query)
     return {
       kurir: kurirData,
       performance: {
@@ -76,7 +74,7 @@ export class KurirService {
   }
 
   async updateKurirRating(id: number, rating: number) {
-    // Validate rating range (0-5)
+    // validate rating range (0-5)
     if (rating < 0 || rating > 5) {
       throw new Error('Rating must be between 0 and 5');
     }
@@ -119,7 +117,7 @@ export class KurirService {
     current_location?: string;
     max_capacity?: string;
   }) {
-    // Generate employee_id
+    // generate employee_id
     const lastKurir = await db
       .select()
       .from(kurir)
@@ -129,7 +127,7 @@ export class KurirService {
     let nextNumber = 1;
     if (lastKurir.length > 0 && lastKurir[0]) {
       const lastEmployeeId = lastKurir[0].employee_id;
-      // Support both old format (KUR_001) and new format (KUR-001)
+      // format KUR-001
       if (lastEmployeeId && (lastEmployeeId.startsWith('KUR-') || lastEmployeeId.startsWith('KUR_'))) {
         const numStr = lastEmployeeId.substring(4);
         const parsed = parseInt(numStr);

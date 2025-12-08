@@ -59,7 +59,7 @@ export class DashboardService {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Daily delivery count
+    // daily delivery count
     const dailyStats = await db
       .select({
         date: sql<string>`DATE(${delivery.created_at})`,

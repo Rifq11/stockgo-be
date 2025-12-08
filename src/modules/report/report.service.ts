@@ -29,7 +29,6 @@ export class ReportService {
     const inProgressDeliveries = deliveries.filter(d => ['pending', 'picked_up', 'in_transit'].includes(d.status)).length;
     const failedDeliveries = deliveries.filter(d => ['failed', 'cancelled'].includes(d.status)).length;
 
-    // Group by period (weekly)
     const periodData = this.groupByPeriod(deliveries, startDate, endDate);
 
     return {
@@ -71,7 +70,7 @@ export class ReportService {
       .leftJoin(user, eq(kurir.user_id, user.id))
       .where(whereClause);
 
-    // Group by kurir
+    // group by kurir
     const kurirStats = deliveries.reduce((acc: any, d: any) => {
       const kurirId = d.kurir?.id || 'unassigned';
       const kurirName = d.user?.full_name || 'Unassigned';
@@ -150,7 +149,7 @@ export class ReportService {
       items = items.filter((item: any) => item.product.category_id === categoryId);
     }
 
-    // Group by product
+    // group by product
     const productStats = items.reduce((acc: any, item: any) => {
       const productId = item.product.id;
       
@@ -206,7 +205,7 @@ export class ReportService {
       .leftJoin(warehouse, eq(delivery.warehouse_id, warehouse.id))
       .where(whereClause);
 
-    // Group by warehouse
+    // group by warehouse
     const warehouseStats = deliveries.reduce((acc: Record<string, any>, d: any) => {
       const whId = (d.warehouse?.id ?? 'unknown').toString();
       const whName = d.warehouse?.name || 'Unknown';
@@ -237,7 +236,7 @@ export class ReportService {
   }
 
   private groupByPeriod(deliveries: any[], startDate?: string, endDate?: string) {
-    // Group by week
+    // group by week
     const periods: Record<string, any> = {};
     
     deliveries.forEach(delivery => {
@@ -277,7 +276,7 @@ export class ReportService {
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
     return new Date(d.setDate(diff));
   }
 

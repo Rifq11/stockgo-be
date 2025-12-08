@@ -73,7 +73,7 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Get default role (kurir) if role_id not provided
+    // default role id is kurir
     let finalRoleId = data.role_id;
     if (!finalRoleId) {
       const [kurirRole] = await db
@@ -98,7 +98,6 @@ export class AuthService {
       is_active: true,
     });
 
-    // Get the created user
     const [newUser] = await db
       .select()
       .from(user)

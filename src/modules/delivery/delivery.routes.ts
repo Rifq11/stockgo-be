@@ -5,7 +5,6 @@ import { authenticate, authorize } from '../../middleware/auth.middleware';
 const router = Router();
 const deliveryController = new DeliveryController();
 
-// Public endpoint for tracking (no auth required)
 router.get('/track/:tracking_number', deliveryController.getDeliveryByTracking.bind(deliveryController));
 
 // Protected routes

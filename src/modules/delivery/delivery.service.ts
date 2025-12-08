@@ -154,14 +154,11 @@ export class DeliveryService {
       .set(updateData)
       .where(eq(delivery.id, deliveryId));
 
-    // Update items if provided
     if (data.items && data.items.length > 0) {
-      // Delete existing items
       await db
         .delete(deliveryItem)
         .where(eq(deliveryItem.delivery_id, deliveryId));
 
-      // Insert new items
       const itemsToInsert = data.items.map((item) => ({
         delivery_id: deliveryId,
         product_id: item.product_id,

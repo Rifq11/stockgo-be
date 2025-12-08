@@ -76,9 +76,8 @@ export class DeliveryController {
         conditions.push(eq(delivery.customer_id, parseInt(customer_id)));
       }
 
-      // Filter by kurir_id if user is kurir
+      // filter by kurir_id
       if (req.user && req.user.role === 'kurir') {
-        // Get kurir.id from user.id
         const [kurirData] = await db
           .select({ id: kurir.id })
           .from(kurir)
@@ -88,7 +87,6 @@ export class DeliveryController {
         if (kurirData) {
           conditions.push(eq(delivery.kurir_id, kurirData.id));
         } else {
-          // If kurir profile doesn't exist, return empty list
           return sendSuccess(res, 'Deliveries retrieved successfully', {
             deliveries: [],
             pagination: {
@@ -117,7 +115,6 @@ export class DeliveryController {
         .offset(offset)
         .orderBy(desc(delivery.created_at));
 
-      // Map response to match frontend format
       const mappedDeliveries = deliveries.map(d => ({
         delivery: d.delivery,
         customer: d.customer,
@@ -185,7 +182,6 @@ export class DeliveryController {
         return sendError(res, 'Delivery not found', 404);
       }
 
-      // Check if user is kurir and delivery is not assigned to them
       if (req.user && req.user.role === 'kurir') {
         const [kurirData] = await db
           .select({ id: kurir.id })
@@ -356,7 +352,6 @@ export class DeliveryController {
 
       const cancelledDelivery = await deliveryService.cancelDelivery(parseInt(id));
 
-      // Add status history
       await db.insert(deliveryStatusHistory).values({
         delivery_id: parseInt(id),
         status: 'cancelled',

@@ -21,7 +21,6 @@ async function seed() {
   console.log('🌱 Starting database seed...\n');
 
   try {
-    // Bersihkan tabel dengan urutan aman terhadap FK
     console.log('🧹 Clearing tables...');
     await db.delete(deliveryStatusHistory);
     await db.delete(deliveryItem);
