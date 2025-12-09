@@ -92,4 +92,28 @@ export class AuthController {
       return sendError(res, error.message || 'Failed to update profile', 400);
     }
   }
+
+  async changePassword(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, 'User ID not found', 401);
+      }
+
+      const { old_password, new_password } = req.body;
+      if (!old_password || !new_password) {
+        return sendError(res, 'Old password and new password are required', 400);
+      }
+
+      if (new_password.length < 6) {
+        return sendError(res, 'New password must be at least 6 characters', 400);
+      }
+
+      const result = await authService.changePassword(userId, old_password, new_password);
+      return sendSuccess(res, 'Password changed successfully', result);
+    } catch (error: any) {
+      console.error('Change password error:', error);
+      return sendError(res, error.message || 'Failed to change password', 400);
+    }
+  }
 }

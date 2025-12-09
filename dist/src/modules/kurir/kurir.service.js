@@ -143,6 +143,20 @@ class KurirService {
             .where((0, drizzle_orm_1.eq)(schema_1.kurir.id, id));
         return this.getKurirById(id);
     }
+    async deleteKurir(id) {
+        const kurirData = await this.getKurirById(id);
+        if (!kurirData) {
+            return null;
+        }
+        await db_1.db.delete(schema_1.kurir).where((0, drizzle_orm_1.eq)(schema_1.kurir.id, id));
+        return { success: true };
+    }
+    async getAvailableUsers() {
+        const allUsers = await db_1.db.select().from(schema_1.user);
+        const kurirUserIds = await db_1.db.select({ user_id: schema_1.kurir.user_id }).from(schema_1.kurir);
+        const kurirIdsSet = new Set(kurirUserIds.map(k => k.user_id));
+        return allUsers.filter(u => !kurirIdsSet.has(u.id));
+    }
 }
 exports.KurirService = KurirService;
 //# sourceMappingURL=kurir.service.js.map

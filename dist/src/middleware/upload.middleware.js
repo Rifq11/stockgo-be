@@ -11,7 +11,7 @@ const getUploadDir = () => {
     if (process.env.UPLOAD_DIR) {
         return process.env.UPLOAD_DIR;
     }
-    return path_1.default.resolve(__dirname, '../../../public/uploads');
+    return path_1.default.resolve(__dirname, '../../public/uploads');
 };
 const uploadDir = getUploadDir();
 if (!fs_1.default.existsSync(uploadDir)) {

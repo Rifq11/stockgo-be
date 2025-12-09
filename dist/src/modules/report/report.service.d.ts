@@ -24,8 +24,10 @@ export declare class ReportService {
         warehouses: any[];
     }>;
     private groupByPeriod;
+    private groupByPeriodFromHistory;
     private getWeekStart;
     private formatWeek;
     private calculateAveragePerDay;
+    private calculateAveragePerDayFromHistory;
 }
 //# sourceMappingURL=report.service.d.ts.map

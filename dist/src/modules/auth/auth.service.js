@@ -148,6 +148,31 @@ class AuthService {
             .where((0, drizzle_orm_1.eq)(schema_1.user.id, userId));
         return this.getProfile(userId);
     }
+    async changePassword(userId, oldPassword, newPassword) {
+        const [existingUser] = await db_1.db
+            .select({
+            id: schema_1.user.id,
+            password: schema_1.user.password,
+        })
+            .from(schema_1.user)
+            .where((0, drizzle_orm_1.eq)(schema_1.user.id, userId))
+            .limit(1);
+        if (!existingUser) {
+            throw new Error('User not found');
+        }
+        const isPasswordValid = await bcryptjs_1.default.compare(oldPassword, existingUser.password);
+        if (!isPasswordValid) {
+            throw new Error('Current password is incorrect');
+        }
+        const hashedPassword = await bcryptjs_1.default.hash(newPassword, 10);
+        await db_1.db
+            .update(schema_1.user)
+            .set({
+            password: hashedPassword,
+        })
+            .where((0, drizzle_orm_1.eq)(schema_1.user.id, userId));
+        return { success: true, message: 'Password changed successfully' };
+    }
 }
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

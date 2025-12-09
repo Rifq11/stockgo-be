@@ -139,7 +139,8 @@ export class KurirController {
 
   async create(req: AuthRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      // Allow admin to specify user_id, otherwise use current user
+      const userId = req.body.user_id ? parseInt(req.body.user_id) : req.user?.id;
       if (!userId) {
         return sendError(res, 'User ID is required', 400);
       }
@@ -190,6 +191,37 @@ export class KurirController {
     } catch (error: any) {
       console.error('Update kurir error:', error);
       return sendError(res, error.message || 'Failed to update kurir profile', 500, error.message);
+    }
+  }
+
+  async delete(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return sendError(res, 'Kurir ID is required', 400);
+      }
+
+      const result = await kurirService.deleteKurir(parseInt(id));
+
+      if (!result) {
+        return sendError(res, 'Kurir not found', 404);
+      }
+
+      return sendSuccess(res, 'Kurir deleted successfully', { id: parseInt(id) });
+    } catch (error: any) {
+      console.error('Delete kurir error:', error);
+      return sendError(res, error.message || 'Failed to delete kurir', 500, error.message);
+    }
+  }
+
+  async getAvailableUsers(req: AuthRequest, res: Response) {
+    try {
+      const users = await kurirService.getAvailableUsers();
+      return sendSuccess(res, 'Available users retrieved successfully', { users });
+    } catch (error: any) {
+      console.error('Get available users error:', error);
+      return sendError(res, 'Failed to get available users', 500, error.message);
     }
   }
 }

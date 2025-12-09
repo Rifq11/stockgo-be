@@ -180,5 +180,24 @@ export class KurirService {
 
     return this.getKurirById(id);
   }
+
+  async deleteKurir(id: number) {
+    const kurirData = await this.getKurirById(id);
+    if (!kurirData) {
+      return null;
+    }
+
+    await db.delete(kurir).where(eq(kurir.id, id));
+    return { success: true };
+  }
+
+  async getAvailableUsers() {
+    // Get all users that don't have kurir profile yet
+    const allUsers = await db.select().from(user);
+    const kurirUserIds = await db.select({ user_id: kurir.user_id }).from(kurir);
+    const kurirIdsSet = new Set(kurirUserIds.map(k => k.user_id));
+    
+    return allUsers.filter(u => !kurirIdsSet.has(u.id));
+  }
 }
 

@@ -1,35 +1,68 @@
 import { db } from '../../config/db';
-import { delivery, deliveryItem, product, inventory, warehouse, kurir, user, category } from '../../../drizzle/schema';
+import { delivery, deliveryItem, product, inventory, warehouse, kurir, user, category, deliveryStatusHistory } from '../../../drizzle/schema';
 import { eq, and, gte, lte, sql, desc, inArray } from 'drizzle-orm';
 
 export class ReportService {
   async getDeliveryReport(startDate?: string, endDate?: string, warehouseId?: number) {
-    const conditions = [];
+    // Get status history records within date range
+    const historyConditions = [];
     
     if (startDate) {
-      conditions.push(gte(delivery.created_at, new Date(startDate)));
+      historyConditions.push(gte(deliveryStatusHistory.created_at, new Date(startDate)));
     }
     if (endDate) {
-      conditions.push(lte(delivery.created_at, new Date(endDate)));
+      // Add one day to include the end date
+      const endDateObj = new Date(endDate);
+      endDateObj.setDate(endDateObj.getDate() + 1);
+      historyConditions.push(lte(deliveryStatusHistory.created_at, endDateObj));
     }
+
+    const historyWhereClause = historyConditions.length > 0 ? and(...historyConditions) : undefined;
+
+    // Get status history with delivery info
+    const statusHistories = await db
+      .select({
+        statusHistory: deliveryStatusHistory,
+        delivery: delivery,
+      })
+      .from(deliveryStatusHistory)
+      .innerJoin(delivery, eq(deliveryStatusHistory.delivery_id, delivery.id))
+      .where(historyWhereClause)
+      .orderBy(desc(deliveryStatusHistory.created_at));
+
+    // Filter by warehouse if specified
+    let filteredHistories = statusHistories;
     if (warehouseId) {
-      conditions.push(eq(delivery.warehouse_id, warehouseId));
+      filteredHistories = statusHistories.filter(h => h.delivery.warehouse_id === warehouseId);
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    // Get unique deliveries and their latest status
+    const deliveryMap = new Map<number, any>();
+    filteredHistories.forEach(h => {
+      const deliveryId = h.delivery.id;
+      if (!deliveryMap.has(deliveryId)) {
+        deliveryMap.set(deliveryId, {
+          ...h.delivery,
+          latest_status: h.statusHistory.status,
+          latest_status_date: h.statusHistory.created_at,
+        });
+      } else {
+        const existing = deliveryMap.get(deliveryId);
+        if (new Date(h.statusHistory.created_at) > new Date(existing.latest_status_date)) {
+          existing.latest_status = h.statusHistory.status;
+          existing.latest_status_date = h.statusHistory.created_at;
+        }
+      }
+    });
 
-    const deliveries = await db
-      .select()
-      .from(delivery)
-      .where(whereClause)
-      .orderBy(desc(delivery.created_at));
-
+    const deliveries = Array.from(deliveryMap.values());
     const totalDeliveries = deliveries.length;
-    const successfulDeliveries = deliveries.filter(d => d.status === 'delivered').length;
-    const inProgressDeliveries = deliveries.filter(d => ['pending', 'picked_up', 'in_transit'].includes(d.status)).length;
-    const failedDeliveries = deliveries.filter(d => ['failed', 'cancelled'].includes(d.status)).length;
+    const successfulDeliveries = deliveries.filter(d => d.latest_status === 'delivered').length;
+    const inProgressDeliveries = deliveries.filter(d => ['pending', 'picked_up', 'in_transit'].includes(d.latest_status)).length;
+    const failedDeliveries = deliveries.filter(d => ['failed', 'cancelled'].includes(d.latest_status)).length;
 
-    const periodData = this.groupByPeriod(deliveries, startDate, endDate);
+    // Group by period using status history dates
+    const periodData = this.groupByPeriodFromHistory(filteredHistories, startDate, endDate);
 
     return {
       summary: {
@@ -38,7 +71,7 @@ export class ReportService {
         in_progress_deliveries: inProgressDeliveries,
         failed_deliveries: failedDeliveries,
         success_rate: totalDeliveries > 0 ? ((successfulDeliveries / totalDeliveries) * 100).toFixed(1) + '%' : '0%',
-        average_per_day: this.calculateAveragePerDay(deliveries, startDate, endDate),
+        average_per_day: this.calculateAveragePerDayFromHistory(filteredHistories, startDate, endDate),
       },
       period_data: periodData,
     };
@@ -273,6 +306,67 @@ export class ReportService {
     }));
   }
 
+  private groupByPeriodFromHistory(statusHistories: any[], startDate?: string, endDate?: string) {
+    // Group by week based on status history dates
+    const periods: Record<string, any> = {};
+    
+    // Get unique deliveries with their latest status in each period
+    // Map structure: weekKey -> Map<deliveryId, {status, date}>
+    const deliveryPeriodMap = new Map<string, Map<number, {status: string, date: Date}>>();
+    
+    statusHistories.forEach(h => {
+      if (!h.statusHistory?.created_at) return;
+      const date = new Date(h.statusHistory.created_at);
+      const weekStart = this.getWeekStart(date);
+      const [weekKey] = weekStart.toISOString().split('T');
+      if (!weekKey) return;
+      
+      const deliveryId = h.delivery.id;
+      
+      if (!deliveryPeriodMap.has(weekKey)) {
+        deliveryPeriodMap.set(weekKey, new Map());
+      }
+      
+      const periodDeliveries = deliveryPeriodMap.get(weekKey)!;
+      const existing = periodDeliveries.get(deliveryId);
+      
+      // Keep the latest status for each delivery in this period
+      if (!existing || date > existing.date) {
+        periodDeliveries.set(deliveryId, {
+          status: h.statusHistory.status,
+          date: date,
+        });
+      }
+    });
+    
+    // Count statuses per period
+    deliveryPeriodMap.forEach((deliveries, weekKey) => {
+      const weekStart = new Date(weekKey + 'T00:00:00');
+      periods[weekKey] = {
+        period: this.formatWeek(weekStart),
+        total: deliveries.size,
+        successful: 0,
+        in_progress: 0,
+        failed: 0,
+      };
+      
+      deliveries.forEach(({status}) => {
+        if (status === 'delivered') {
+          periods[weekKey].successful++;
+        } else if (['pending', 'picked_up', 'in_transit'].includes(status)) {
+          periods[weekKey].in_progress++;
+        } else if (['failed', 'cancelled'].includes(status)) {
+          periods[weekKey].failed++;
+        }
+      });
+    });
+
+    return Object.values(periods).map((p: any) => ({
+      ...p,
+      success_rate: p.total > 0 ? ((p.successful / p.total) * 100).toFixed(1) + '%' : '0%',
+    }));
+  }
+
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
@@ -299,6 +393,19 @@ export class ReportService {
     
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) || 1;
     return Math.round(deliveries.length / days);
+  }
+
+  private calculateAveragePerDayFromHistory(statusHistories: any[], startDate?: string, endDate?: string): number {
+    if (statusHistories.length === 0) return 0;
+    
+    // Get unique deliveries
+    const uniqueDeliveries = new Set(statusHistories.map(h => h.delivery.id));
+    
+    const start = startDate ? new Date(startDate) : new Date(Math.min(...statusHistories.map(h => new Date(h.statusHistory.created_at).getTime())));
+    const end = endDate ? new Date(endDate) : new Date(Math.max(...statusHistories.map(h => new Date(h.statusHistory.created_at).getTime())));
+    
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+    return Math.round(uniqueDeliveries.size / days);
   }
 }
 

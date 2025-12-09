@@ -116,7 +116,7 @@ class KurirController {
     }
     async create(req, res) {
         try {
-            const userId = req.user?.id;
+            const userId = req.body.user_id ? parseInt(req.body.user_id) : req.user?.id;
             if (!userId) {
                 return (0, response_util_1.sendError)(res, 'User ID is required', 400);
             }
@@ -160,6 +160,33 @@ class KurirController {
         catch (error) {
             console.error('Update kurir error:', error);
             return (0, response_util_1.sendError)(res, error.message || 'Failed to update kurir profile', 500, error.message);
+        }
+    }
+    async delete(req, res) {
+        try {
+            const { id } = req.params;
+            if (!id) {
+                return (0, response_util_1.sendError)(res, 'Kurir ID is required', 400);
+            }
+            const result = await kurirService.deleteKurir(parseInt(id));
+            if (!result) {
+                return (0, response_util_1.sendError)(res, 'Kurir not found', 404);
+            }
+            return (0, response_util_1.sendSuccess)(res, 'Kurir deleted successfully', { id: parseInt(id) });
+        }
+        catch (error) {
+            console.error('Delete kurir error:', error);
+            return (0, response_util_1.sendError)(res, error.message || 'Failed to delete kurir', 500, error.message);
+        }
+    }
+    async getAvailableUsers(req, res) {
+        try {
+            const users = await kurirService.getAvailableUsers();
+            return (0, response_util_1.sendSuccess)(res, 'Available users retrieved successfully', { users });
+        }
+        catch (error) {
+            console.error('Get available users error:', error);
+            return (0, response_util_1.sendError)(res, 'Failed to get available users', 500, error.message);
         }
     }
 }

@@ -54,5 +54,9 @@ export declare class AuthService {
         is_active: boolean;
         created_at: Date;
     }>;
+    changePassword(userId: number, oldPassword: string, newPassword: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }
 //# sourceMappingURL=auth.service.d.ts.map

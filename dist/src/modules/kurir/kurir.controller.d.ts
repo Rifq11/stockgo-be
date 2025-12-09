@@ -9,5 +9,7 @@ export declare class KurirController {
     getByUserId(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     create(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     update(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
+    delete(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
+    getAvailableUsers(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
 }
 //# sourceMappingURL=kurir.controller.d.ts.map

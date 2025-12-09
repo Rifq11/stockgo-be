@@ -10,5 +10,6 @@ router.post('/register', authController.register.bind(authController));
 router.post('/logout', auth_middleware_1.authenticate, authController.logout.bind(authController));
 router.get('/profile', auth_middleware_1.authenticate, authController.getProfile.bind(authController));
 router.put('/profile', auth_middleware_1.authenticate, authController.updateProfile.bind(authController));
+router.put('/change-password', auth_middleware_1.authenticate, authController.changePassword.bind(authController));
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

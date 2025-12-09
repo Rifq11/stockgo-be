@@ -6,5 +6,6 @@ export declare class AuthController {
     logout(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     getProfile(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     updateProfile(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
+    changePassword(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
 }
 //# sourceMappingURL=auth.controller.d.ts.map

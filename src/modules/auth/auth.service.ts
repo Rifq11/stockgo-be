@@ -178,5 +178,39 @@ export class AuthService {
 
     return this.getProfile(userId);
   }
+
+  async changePassword(userId: number, oldPassword: string, newPassword: string) {
+    const [existingUser] = await db
+      .select({
+        id: user.id,
+        password: user.password,
+      })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    if (!existingUser) {
+      throw new Error('User not found');
+    }
+
+    // Verify old password
+    const isPasswordValid = await bcrypt.compare(oldPassword, existingUser.password);
+    if (!isPasswordValid) {
+      throw new Error('Current password is incorrect');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await db
+      .update(user)
+      .set({
+        password: hashedPassword,
+      })
+      .where(eq(user.id, userId));
+
+    return { success: true, message: 'Password changed successfully' };
+  }
 }
 

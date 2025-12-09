@@ -124,6 +124,27 @@ class ProductController {
             return (0, response_util_1.sendError)(res, 'Failed to get categories', 500, error.message);
         }
     }
+    async uploadImage(req, res) {
+        try {
+            const file = req.file;
+            if (!file) {
+                return (0, response_util_1.sendError)(res, 'No file uploaded', 400);
+            }
+            const uploadsIndex = file.path.indexOf('uploads');
+            const relativePath = uploadsIndex !== -1
+                ? '/' + file.path.substring(uploadsIndex).replace(/\\/g, '/')
+                : `/uploads/${file.filename}`;
+            return (0, response_util_1.sendSuccess)(res, 'Image uploaded successfully', {
+                image_url: relativePath,
+                file_name: file.filename,
+                file_size: file.size,
+            });
+        }
+        catch (error) {
+            console.error('Upload image error:', error);
+            return (0, response_util_1.sendError)(res, 'Failed to upload image', 500, error.message);
+        }
+    }
 }
 exports.ProductController = ProductController;
 //# sourceMappingURL=product.controller.js.map

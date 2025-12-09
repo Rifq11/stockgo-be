@@ -227,5 +227,19 @@ export declare class KurirService {
         rating: string | null;
         total_deliveries: number | null;
     } | null>;
+    deleteKurir(id: number): Promise<{
+        success: boolean;
+    } | null>;
+    getAvailableUsers(): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        id: number;
+        full_name: string;
+        email: string;
+        password: string;
+        phone: string | null;
+        role_id: number;
+        is_active: boolean;
+    }[]>;
 }
 //# sourceMappingURL=kurir.service.d.ts.map

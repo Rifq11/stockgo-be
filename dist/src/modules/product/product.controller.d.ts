@@ -7,5 +7,6 @@ export declare class ProductController {
     updateProduct(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     deleteProduct(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
     getCategories(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
+    uploadImage(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
 }
 //# sourceMappingURL=product.controller.d.ts.map

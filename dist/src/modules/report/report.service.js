@@ -6,27 +6,53 @@ const schema_1 = require("../../../drizzle/schema");
 const drizzle_orm_1 = require("drizzle-orm");
 class ReportService {
     async getDeliveryReport(startDate, endDate, warehouseId) {
-        const conditions = [];
+        const historyConditions = [];
         if (startDate) {
-            conditions.push((0, drizzle_orm_1.gte)(schema_1.delivery.created_at, new Date(startDate)));
+            historyConditions.push((0, drizzle_orm_1.gte)(schema_1.deliveryStatusHistory.created_at, new Date(startDate)));
         }
         if (endDate) {
-            conditions.push((0, drizzle_orm_1.lte)(schema_1.delivery.created_at, new Date(endDate)));
+            const endDateObj = new Date(endDate);
+            endDateObj.setDate(endDateObj.getDate() + 1);
+            historyConditions.push((0, drizzle_orm_1.lte)(schema_1.deliveryStatusHistory.created_at, endDateObj));
         }
+        const historyWhereClause = historyConditions.length > 0 ? (0, drizzle_orm_1.and)(...historyConditions) : undefined;
+        const statusHistories = await db_1.db
+            .select({
+            statusHistory: schema_1.deliveryStatusHistory,
+            delivery: schema_1.delivery,
+        })
+            .from(schema_1.deliveryStatusHistory)
+            .innerJoin(schema_1.delivery, (0, drizzle_orm_1.eq)(schema_1.deliveryStatusHistory.delivery_id, schema_1.delivery.id))
+            .where(historyWhereClause)
+            .orderBy((0, drizzle_orm_1.desc)(schema_1.deliveryStatusHistory.created_at));
+        let filteredHistories = statusHistories;
         if (warehouseId) {
-            conditions.push((0, drizzle_orm_1.eq)(schema_1.delivery.warehouse_id, warehouseId));
+            filteredHistories = statusHistories.filter(h => h.delivery.warehouse_id === warehouseId);
         }
-        const whereClause = conditions.length > 0 ? (0, drizzle_orm_1.and)(...conditions) : undefined;
-        const deliveries = await db_1.db
-            .select()
-            .from(schema_1.delivery)
-            .where(whereClause)
-            .orderBy((0, drizzle_orm_1.desc)(schema_1.delivery.created_at));
+        const deliveryMap = new Map();
+        filteredHistories.forEach(h => {
+            const deliveryId = h.delivery.id;
+            if (!deliveryMap.has(deliveryId)) {
+                deliveryMap.set(deliveryId, {
+                    ...h.delivery,
+                    latest_status: h.statusHistory.status,
+                    latest_status_date: h.statusHistory.created_at,
+                });
+            }
+            else {
+                const existing = deliveryMap.get(deliveryId);
+                if (new Date(h.statusHistory.created_at) > new Date(existing.latest_status_date)) {
+                    existing.latest_status = h.statusHistory.status;
+                    existing.latest_status_date = h.statusHistory.created_at;
+                }
+            }
+        });
+        const deliveries = Array.from(deliveryMap.values());
         const totalDeliveries = deliveries.length;
-        const successfulDeliveries = deliveries.filter(d => d.status === 'delivered').length;
-        const inProgressDeliveries = deliveries.filter(d => ['pending', 'picked_up', 'in_transit'].includes(d.status)).length;
-        const failedDeliveries = deliveries.filter(d => ['failed', 'cancelled'].includes(d.status)).length;
-        const periodData = this.groupByPeriod(deliveries, startDate, endDate);
+        const successfulDeliveries = deliveries.filter(d => d.latest_status === 'delivered').length;
+        const inProgressDeliveries = deliveries.filter(d => ['pending', 'picked_up', 'in_transit'].includes(d.latest_status)).length;
+        const failedDeliveries = deliveries.filter(d => ['failed', 'cancelled'].includes(d.latest_status)).length;
+        const periodData = this.groupByPeriodFromHistory(filteredHistories, startDate, endDate);
         return {
             summary: {
                 total_deliveries: totalDeliveries,
@@ -34,7 +60,7 @@ class ReportService {
                 in_progress_deliveries: inProgressDeliveries,
                 failed_deliveries: failedDeliveries,
                 success_rate: totalDeliveries > 0 ? ((successfulDeliveries / totalDeliveries) * 100).toFixed(1) + '%' : '0%',
-                average_per_day: this.calculateAveragePerDay(deliveries, startDate, endDate),
+                average_per_day: this.calculateAveragePerDayFromHistory(filteredHistories, startDate, endDate),
             },
             period_data: periodData,
         };
@@ -233,6 +259,56 @@ class ReportService {
             success_rate: p.total > 0 ? ((p.successful / p.total) * 100).toFixed(1) + '%' : '0%',
         }));
     }
+    groupByPeriodFromHistory(statusHistories, startDate, endDate) {
+        const periods = {};
+        const deliveryPeriodMap = new Map();
+        statusHistories.forEach(h => {
+            if (!h.statusHistory?.created_at)
+                return;
+            const date = new Date(h.statusHistory.created_at);
+            const weekStart = this.getWeekStart(date);
+            const [weekKey] = weekStart.toISOString().split('T');
+            if (!weekKey)
+                return;
+            const deliveryId = h.delivery.id;
+            if (!deliveryPeriodMap.has(weekKey)) {
+                deliveryPeriodMap.set(weekKey, new Map());
+            }
+            const periodDeliveries = deliveryPeriodMap.get(weekKey);
+            const existing = periodDeliveries.get(deliveryId);
+            if (!existing || date > existing.date) {
+                periodDeliveries.set(deliveryId, {
+                    status: h.statusHistory.status,
+                    date: date,
+                });
+            }
+        });
+        deliveryPeriodMap.forEach((deliveries, weekKey) => {
+            const weekStart = new Date(weekKey + 'T00:00:00');
+            periods[weekKey] = {
+                period: this.formatWeek(weekStart),
+                total: deliveries.size,
+                successful: 0,
+                in_progress: 0,
+                failed: 0,
+            };
+            deliveries.forEach(({ status }) => {
+                if (status === 'delivered') {
+                    periods[weekKey].successful++;
+                }
+                else if (['pending', 'picked_up', 'in_transit'].includes(status)) {
+                    periods[weekKey].in_progress++;
+                }
+                else if (['failed', 'cancelled'].includes(status)) {
+                    periods[weekKey].failed++;
+                }
+            });
+        });
+        return Object.values(periods).map((p) => ({
+            ...p,
+            success_rate: p.total > 0 ? ((p.successful / p.total) * 100).toFixed(1) + '%' : '0%',
+        }));
+    }
     getWeekStart(date) {
         const d = new Date(date);
         const day = d.getDay();
@@ -254,6 +330,15 @@ class ReportService {
         const end = endDate ? new Date(endDate) : new Date(Math.max(...deliveries.map(d => new Date(d.created_at).getTime())));
         const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) || 1;
         return Math.round(deliveries.length / days);
+    }
+    calculateAveragePerDayFromHistory(statusHistories, startDate, endDate) {
+        if (statusHistories.length === 0)
+            return 0;
+        const uniqueDeliveries = new Set(statusHistories.map(h => h.delivery.id));
+        const start = startDate ? new Date(startDate) : new Date(Math.min(...statusHistories.map(h => new Date(h.statusHistory.created_at).getTime())));
+        const end = endDate ? new Date(endDate) : new Date(Math.max(...statusHistories.map(h => new Date(h.statusHistory.created_at).getTime())));
+        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+        return Math.round(uniqueDeliveries.size / days);
     }
 }
 exports.ReportService = ReportService;

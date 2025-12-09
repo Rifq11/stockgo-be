@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { ProductController } from './product.controller';
 import { authenticate, authorize } from '../../middleware/auth.middleware';
+import { uploadSingle } from '../../middleware/upload.middleware';
 
 const router = Router();
 const productController = new ProductController();
 
 router.get('/categories', authenticate, productController.getCategories.bind(productController));
+router.post('/upload-image', authenticate, authorize('admin'), uploadSingle, productController.uploadImage.bind(productController));
 router.get('/', authenticate, productController.getProducts.bind(productController));
 router.post('/', authenticate, authorize('admin'), productController.createProduct.bind(productController));
 router.get('/:id', authenticate, productController.getProductById.bind(productController));
