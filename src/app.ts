@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // __dirname = dist/src biasanya → naik 2 level ke root project
 app.use(
   '/uploads',
-  express.static(path.resolve(__dirname, '../../public/uploads'))
+  express.static(path.resolve(__dirname, '../public/uploads'))
 );
 
 // HEALTH CHECK

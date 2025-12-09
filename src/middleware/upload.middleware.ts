@@ -9,7 +9,7 @@ const getUploadDir = (): string => {
     return process.env.UPLOAD_DIR;
   }
   // In compiled JS: dist/src/middleware -> ../../.. -> root -> public/uploads
-  return path.resolve(__dirname, '../../../public/uploads');
+  return path.resolve(__dirname, '../../public/uploads');
 };
 
 const uploadDir: string = getUploadDir();

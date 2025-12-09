@@ -110,7 +110,7 @@ export class MediaController {
       // __dirname in compiled JS will be dist/src/modules/media, so we go up 4 levels to reach root
       const baseUploadDir = process.env.UPLOAD_DIR 
         ? process.env.UPLOAD_DIR 
-        : path.resolve(__dirname, '../../../../public/uploads');
+        : path.resolve(__dirname, '../../public/uploads');
       const filePath = path.join(baseUploadDir, folder, filename);
 
       if (!fs.existsSync(filePath)) {
