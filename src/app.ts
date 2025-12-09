@@ -11,15 +11,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// STATIC UPLOADS (PREFIX = /stockgo/uploads)
+// STATIC UPLOADS
 // __dirname = dist/src biasanya → naik 2 level ke root project
 app.use(
-  '/stockgo/uploads',
+  '/uploads',
   express.static(path.resolve(__dirname, '../../public/uploads'))
 );
 
 // HEALTH CHECK
-app.get('/stockgo/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
     message: 'Kurir Barang API is running',
@@ -39,17 +39,17 @@ import mediaRoutes from './modules/media/media.routes';
 import productRoutes from './modules/product/product.routes';
 import reportRoutes from './modules/report/report.routes';
 
-// PREFIX SEMUA ROUTE DENGAN /stockgo/api
-app.use('/stockgo/api/auth', authRoutes);
-app.use('/stockgo/api/customers', customerRoutes);
-app.use('/stockgo/api/deliveries', deliveryRoutes);
-app.use('/stockgo/api/dashboard', dashboardRoutes);
-app.use('/stockgo/api/media', mediaRoutes);
-app.use('/stockgo/api/products', productRoutes);
-app.use('/stockgo/api/warehouses', warehouseRoutes);
-app.use('/stockgo/api/kurir', kurirRoutes);
-app.use('/stockgo/api/expeditions', expeditionRoutes);
-app.use('/stockgo/api/reports', reportRoutes);
+// API ROUTES
+app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/warehouses', warehouseRoutes);
+app.use('/api/kurir', kurirRoutes);
+app.use('/api/expeditions', expeditionRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 404 HANDLER
 app.use((req, res) => {
