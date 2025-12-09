@@ -11,21 +11,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// STATIC UPLOADS
-// __dirname = dist/src biasanya → naik 2 level ke root project
 app.use(
   '/uploads',
   express.static(path.resolve(__dirname, '../public/uploads'))
 );
-
-// HEALTH CHECK
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'Kurir Barang API is running',
-    timestamp: new Date().toISOString()
-  });
-});
 
 // ROUTES
 import authRoutes from './modules/auth/auth.routes';
